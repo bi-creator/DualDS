@@ -13,8 +13,8 @@ enum AppConfiguration {
     static let melonDSVersion = "1.1"
 
     /// Where the corresponding source for each release is published (GPL-3.0 §6).
-    /// Set before the first TestFlight build; see Documentation/LICENSING_REPORT.md.
-    static let sourceCodeURL: URL? = nil
+    /// Each release must also be tagged there (see Documentation/LICENSING_REPORT.md).
+    static let sourceCodeURL: URL? = URL(string: "https://github.com/bi-creator/DualDS")
 
     static var marketingVersion: String {
         Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "?"

@@ -69,8 +69,7 @@ from building, modifying and redistributing it, including for free.
 
 ## 6. Decisions for the project owner
 
-1. Confirm DualDS is published as GPL-3.0 open source (required to ship melonDS). Where will the
-   public repo live?
+1. ✅ Published as GPL-3.0 at https://github.com/bi-creator/DualDS (2026-11-19).
 2. Contact the melonDS team before public release? (Recommended.)
 3. Keep the name "DualDS" or choose a store name without "DS"? The code name can stay either way.
 4. Business model: free, or paid with source published? (Both are GPL-compatible.)

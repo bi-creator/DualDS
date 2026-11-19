@@ -9,7 +9,7 @@
 ## First-time setup
 
 ```sh
-git clone --recursive <repo-url> DualDS && cd DualDS
+git clone --recursive https://github.com/bi-creator/DualDS.git && cd DualDS
 Scripts/bootstrap.sh            # checks tools, fetches melonDS, generates DualDS.xcodeproj
 cp Config/Signing.template.xcconfig Config/Signing.local.xcconfig   # then fill in your Team ID + bundle ID
 ```

@@ -67,6 +67,11 @@ sim_run_impl() {
 # Signed Release build for a generic iOS device: proves device compilation, linking and signing
 # without hardware attached. Uses DEVELOPMENT_TEAM from Config/Signing.local.xcconfig.
 device_build() {
+  # 1) Unsigned arm64 device build: proves the app, bridge and core compile and link for hardware.
+  run_logged device-compile xcodebuild -project DualDS.xcodeproj -scheme DualDS -configuration Release \
+    -destination 'generic/platform=iOS' -derivedDataPath "$DERIVED" CODE_SIGNING_ALLOWED=NO build
+  run_logged warnings-device no_source_warnings device-compile
+  # 2) Signed build (needs the team's Apple account in Xcode > Settings > Accounts).
   run_logged device-build xcodebuild -project DualDS.xcodeproj -scheme DualDS -configuration Release \
     -destination 'generic/platform=iOS' -derivedDataPath "$DERIVED" -allowProvisioningUpdates build
 }

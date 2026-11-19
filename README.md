@@ -18,7 +18,7 @@ Swift 5 / SwiftUI / UIKit (MVVM) · Objective-C++ bridge · C++20 session layer 
 
 ```sh
 brew install cmake ninja xcodegen
-git clone --recursive <repo-url> && cd DualDS
+git clone --recursive https://github.com/bi-creator/DualDS.git && cd DualDS
 Scripts/bootstrap.sh
 Scripts/ci.sh phase1          # build + test the app on the Simulator
 Scripts/test-core-host.sh     # headless emulator tests on the Mac
