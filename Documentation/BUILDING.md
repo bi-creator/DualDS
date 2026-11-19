@@ -24,6 +24,7 @@ cp Config/Signing.template.xcconfig Config/Signing.local.xcconfig   # then fill 
 | `Scripts/test-core-host.sh` | builds melonDS + DualDSCore for the Mac and runs the headless emulator tests |
 | `Scripts/build-core.sh all` | builds `Build/DualDSCore.xcframework` (iOS arm64 + Simulator arm64) |
 | `Scripts/verify-licenses.sh` | licence/notice/content compliance checks |
+| `Scripts/dev-runner.sh` | optional: lets a remote collaborator request the fixed steps above by dropping files in `Build/requests/` (you start and stop it) |
 
 Every step writes `Build/logs/<step>.log` and `Build/logs/<step>.status` (`PASS` / `FAIL <code>`).
 
