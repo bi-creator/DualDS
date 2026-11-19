@@ -58,6 +58,14 @@ targets:
           - UIInterfaceOrientationPortraitUpsideDown
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
+        # Documents folder visible in Files ("On My iPhone > DualDS"); .nds files open in DualDS.
+        UIFileSharingEnabled: true
+        LSSupportsOpeningDocumentsInPlace: true
+        CFBundleDocumentTypes:
+          - CFBundleTypeName: Nintendo DS ROM
+            CFBundleTypeRole: Viewer
+            LSHandlerRank: Owner
+            LSItemContentTypes: [com.dualds.nds-rom]
         UTImportedTypeDeclarations:
           - UTTypeIdentifier: com.dualds.nds-rom
             UTTypeDescription: Nintendo DS ROM

@@ -40,9 +40,29 @@ struct RootView: View {
         _model = State(initialValue: GameLibraryViewModel(storage: storage))
     }
 
+    @Environment(\.scenePhase) private var scenePhase
+
     var body: some View {
         GameLibraryView(model: model)
-            .task { await importForUITestsIfRequested() }
+            .task {
+                await importForUITestsIfRequested()
+                await importFromFilesFolder()
+            }
+            .onChange(of: scenePhase) { _, phase in
+                if phase == .active { Task { await importFromFilesFolder() } }
+            }
+            // "Open in DualDS" from Files, AirDrop or another app.
+            .onOpenURL { url in
+                Task { await model.importFiles([url], into: context) }
+            }
+    }
+
+    private func importFromFilesFolder() async {
+        #if DEBUG
+        if ProcessInfo.processInfo.environment["DUALDS_UITEST_FRESH"] == "1" { return } // keep UI tests hermetic
+        #endif
+        guard let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else { return }
+        await model.importFromDocumentsFolder(documents, into: context)
     }
 
     /// DEBUG-only hook so UI tests can exercise the library without driving the system file picker.

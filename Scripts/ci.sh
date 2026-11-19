@@ -49,6 +49,14 @@ sim_run_impl() {
   xcrun simctl bootstatus "$sim" -b
   xcrun simctl install "$sim" "$app"
   local bid; bid="$(/usr/libexec/PlistBuddy -c 'Print CFBundleIdentifier' "$app/Info.plist")"
+  # Games you own placed in Build/import/ (git-ignored) go into the app's Files folder; DualDS
+  # imports them on launch.
+  if compgen -G "$ROOT/Build/import/*.nds" >/dev/null; then
+    local docs; docs="$(xcrun simctl get_app_container "$sim" "$bid" data)/Documents"
+    mkdir -p "$docs"
+    cp "$ROOT"/Build/import/*.nds "$docs/"
+    echo "copied into $docs:"; ls "$docs"
+  fi
   xcrun simctl terminate "$sim" "$bid" 2>/dev/null || true
   xcrun simctl launch "$sim" "$bid"
   sleep 4

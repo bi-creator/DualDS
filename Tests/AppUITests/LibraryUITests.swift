@@ -23,7 +23,11 @@ final class LibraryUITests: XCTestCase {
         card.tap()
         XCTAssertTrue(app.staticTexts["DDST"].waitForExistence(timeout: 5), "detail shows the game code")
         let delete = app.buttons["detail.delete"]
-        for _ in 0..<6 where !delete.isHittable { app.swipeUp() }  // Form rows load lazily below the fold
+        // Form rows load lazily below the fold; scroll the sheet's list, not the window.
+        let list = app.collectionViews.firstMatch
+        for _ in 0..<12 where !(delete.exists && delete.isHittable) {
+            if list.exists { list.swipeUp(velocity: .slow) } else { app.swipeUp() }
+        }
         XCTAssertTrue(delete.isHittable)
         delete.tap()
         let confirm = app.buttons["Delete Game, Saves and States"]

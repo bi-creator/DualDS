@@ -42,12 +42,16 @@ final class GameLibraryViewModel {
         }
     }
 
+    enum ImportOutcome: Equatable { case imported, duplicate, failed }
+
     /// Imports each URL in turn; a failure on one file does not stop the others.
-    func importFiles(_ urls: [URL], into context: ModelContext) async {
+    @discardableResult
+    func importFiles(_ urls: [URL], into context: ModelContext) async -> [URL: ImportOutcome] {
         isImporting = true
         defer { isImporting = false }
         var imported: [String] = []
         var failures: [String] = []
+        var outcomes: [URL: ImportOutcome] = [:]
         for url in urls {
             let existing = Set(((try? context.fetch(FetchDescriptor<Game>())) ?? []).map(\.contentHash))
             do {
@@ -55,11 +59,35 @@ final class GameLibraryViewModel {
                 context.insert(Game(imported: rom))
                 try context.save()
                 imported.append(rom.displayTitle)
+                outcomes[url] = .imported
             } catch {
                 failures.append("\(url.lastPathComponent): \(error.localizedDescription)")
+                outcomes[url] = (error as? GameImportError) == .duplicate ? .duplicate : .failed
             }
         }
         importReport = Self.report(imported: imported, failures: failures)
+        return outcomes
+    }
+
+    /// The app's Documents folder, shown in the Files app as "On My iPhone › DualDS".
+    /// `.nds` files placed there are imported automatically; once imported (or found to be
+    /// duplicates) they move to the "Imported" subfolder so they are not processed twice.
+    /// Files that fail validation stay where they are, and the reason is shown.
+    func importFromDocumentsFolder(_ documents: URL, into context: ModelContext) async {
+        let fm = FileManager.default
+        guard let entries = try? fm.contentsOfDirectory(at: documents, includingPropertiesForKeys: nil) else { return }
+        let roms = entries.filter { $0.pathExtension.lowercased() == "nds" }.sorted { $0.lastPathComponent < $1.lastPathComponent }
+        guard !roms.isEmpty else { return }
+        let outcomes = await importFiles(roms, into: context)
+        let done = documents.appendingPathComponent("Imported", isDirectory: true)
+        for (url, outcome) in outcomes where outcome != .failed {
+            try? fm.createDirectory(at: done, withIntermediateDirectories: true)
+            var target = done.appendingPathComponent(url.lastPathComponent)
+            if fm.fileExists(atPath: target.path) {
+                target = done.appendingPathComponent("\(url.deletingPathExtension().lastPathComponent)-\(UUID().uuidString.prefix(6)).nds")
+            }
+            try? fm.moveItem(at: url, to: target)
+        }
     }
 
     static func report(imported: [String], failures: [String]) -> String? {

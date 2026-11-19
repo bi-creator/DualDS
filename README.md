@@ -32,6 +32,11 @@ Use **Import Game** (or **+**) in the Library and choose one or more `.nds` file
 header, rejects duplicates and DSi-exclusive titles, and copies the file into its own storage; the
 original is left untouched. Delete a game from its details sheet or with a long press.
 
+You can also put `.nds` files in **Files → On My iPhone → DualDS** (or use "Open in DualDS"
+from Files or AirDrop). DualDS imports them the next time it opens and moves them into an
+`Imported` subfolder. For development, `.nds` files in `Build/import/` (git-ignored) are copied
+into the Simulator by `Scripts/ci.sh sim-run`.
+
 ## Documentation
 
 * [Architecture](Documentation/ARCHITECTURE.md): layers, threads, how DualDS calls melonDS

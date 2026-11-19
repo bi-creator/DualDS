@@ -87,7 +87,7 @@ DSSession::Impl::Impl(SessionConfig c, Callbacks cb)
 void DSSession::Impl::applyInput()
 {
     // melonDS expects active-low bits: 0 = pressed.
-    const uint32_t pressed = buttons.load(std::memory_order_relaxed) & 0xFFF;
+    const uint32_t pressed = (buttons.load(std::memory_order_relaxed) | latched.exchange(0, std::memory_order_relaxed)) & 0xFFF;
     nds->SetKeyMask(~pressed & 0xFFF);
 
     const uint32_t t = touch.load(std::memory_order_relaxed);
@@ -440,11 +440,21 @@ uint64_t DSSession::runFramesBlocking(uint64_t count)
 void DSSession::setButton(Button button, bool pressed)
 {
     const uint32_t bit = 1u << static_cast<uint32_t>(button);
-    if (pressed) impl_->buttons.fetch_or(bit);
+    if (pressed) { impl_->buttons.fetch_or(bit); impl_->latched.fetch_or(bit); }
     else impl_->buttons.fetch_and(~bit);
 }
 
-void DSSession::setButtonMask(uint32_t pressedMask) { impl_->buttons.store(pressedMask & 0xFFF); }
+void DSSession::setButtonMask(uint32_t pressedMask)
+{
+    const uint32_t newly = pressedMask & ~impl_->buttons.load();
+    impl_->buttons.store(pressedMask & 0xFFF);
+    impl_->latched.fetch_or(newly & 0xFFF);
+}
+
+uint32_t DSSession::buttonsForNextFrame() const
+{
+    return (impl_->buttons.load() | impl_->latched.load()) & 0xFFF;
+}
 
 void DSSession::setTouch(int x, int y, bool touching)
 {

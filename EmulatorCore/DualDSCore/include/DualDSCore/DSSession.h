@@ -99,6 +99,9 @@ public:
     // ---- Input (any thread) -------------------------------------------------
     void setButton(Button button, bool pressed);
     void setButtonMask(uint32_t pressedMask);       // bit i set == Button(i) held
+    /// Mask the next frame will see: held buttons plus any pressed-and-released since the last
+    /// frame (every press lasts at least one frame).
+    uint32_t buttonsForNextFrame() const;
     /// x in [0,255], y in [0,191] bottom-screen pixels. Values outside are clamped.
     void setTouch(int x, int y, bool touching);
     void setFastForward(bool enabled);

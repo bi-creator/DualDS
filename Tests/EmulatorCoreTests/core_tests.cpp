@@ -105,6 +105,19 @@ int main(int argc, char** argv)
         CHECK(perFrame > 760 && perFrame < 840, "SPU output rate matches 48 kHz");
         CHECK(s.readAudio(pcm.data(), 512) == 512, "audio can be read back");
 
+        std::printf("[short taps]\n");
+        s.setButton(Button::A, true);
+        s.setButton(Button::A, false);      // released before any frame ran
+        CHECK(s.buttonsForNextFrame() == (1u << 0), "a tap shorter than a frame is still delivered");
+        s.runFramesBlocking(1);
+        CHECK(s.buttonsForNextFrame() == 0, "...for exactly one frame");
+        s.setButton(Button::B, true);
+        s.runFramesBlocking(2);
+        CHECK(s.buttonsForNextFrame() == (1u << 1), "held buttons stay held");
+        s.setButton(Button::B, false);
+        CHECK(s.buttonsForNextFrame() == 0, "release after a frame is immediate");
+        s.runFramesBlocking(kSettleFrames);  // let the fixture finish any repaint the taps started
+
         std::printf("[save states]\n");
         const std::string st = tmpPath("slot1.mln");
         CHECK(s.saveState(st, &detail) == SessionError::None, "saveState writes a file");

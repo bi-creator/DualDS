@@ -107,6 +107,30 @@ final class GameLibraryTests: XCTestCase {
         XCTAssertEqual(model.visibleGames([game, other]).map(\.title), ["Alpha", "DUALDSTEST"])
     }
 
+    func testFilesFolderImportMovesProcessedFilesAndKeepsInvalidOnes() async throws {
+        let context = try makeContext()
+        let model = GameLibraryViewModel(storage: storage)
+        let docs = root.appendingPathComponent("Documents", isDirectory: true)
+        try FileManager.default.createDirectory(at: docs, withIntermediateDirectories: true)
+        try FileManager.default.copyItem(at: try fixtureURL(), to: docs.appendingPathComponent("mygame.nds"))
+        try Data(repeating: 0x42, count: 0x4000).write(to: docs.appendingPathComponent("broken.nds"))
+        try Data("notes".utf8).write(to: docs.appendingPathComponent("readme.txt"))
+
+        await model.importFromDocumentsFolder(docs, into: context)
+
+        XCTAssertEqual(try context.fetch(FetchDescriptor<Game>()).map(\.gameCode), ["DDST"])
+        let fm = FileManager.default
+        XCTAssertTrue(fm.fileExists(atPath: docs.appendingPathComponent("Imported/mygame.nds").path), "imported file moved aside")
+        XCTAssertFalse(fm.fileExists(atPath: docs.appendingPathComponent("mygame.nds").path))
+        XCTAssertTrue(fm.fileExists(atPath: docs.appendingPathComponent("broken.nds").path), "invalid file left for the user")
+        XCTAssertTrue(fm.fileExists(atPath: docs.appendingPathComponent("readme.txt").path), "non-ROM files untouched")
+        XCTAssertTrue(model.importReport?.contains("broken.nds") ?? false, "failure is reported")
+
+        // Running again doesn't re-import anything.
+        await model.importFromDocumentsFolder(docs, into: context)
+        XCTAssertEqual(try context.fetch(FetchDescriptor<Game>()).count, 1)
+    }
+
     func testDeleteRemovesFilesAndEntry() async throws {
         let context = try makeContext()
         let model = GameLibraryViewModel(storage: storage)

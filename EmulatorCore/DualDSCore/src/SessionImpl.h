@@ -96,6 +96,9 @@ struct DSSession::Impl {
 
     // Input (lock-free)
     std::atomic<uint32_t> buttons{0};
+    /// Buttons pressed since the last frame. OR'd into the mask for one frame so a tap shorter
+    /// than a frame (touch screens make that easy) is still seen by the game.
+    std::atomic<uint32_t> latched{0};
     std::atomic<uint32_t> touch{0};
     std::atomic<bool> fastForward{false};
     std::atomic<bool> lidClosed{false};
