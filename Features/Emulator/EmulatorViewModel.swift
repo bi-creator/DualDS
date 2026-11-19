@@ -117,7 +117,7 @@ final class EmulatorViewModel {
         core.onStopped = Self.stopHandler(for: self)
         game.lastPlayedAt = .now
         try? context.save()
-        do { try audio.start() } catch { audioError = "Sound is unavailable: \(error.localizedDescription)" }
+        do { try await audio.start() } catch { audioError = "Sound is unavailable: \(error.localizedDescription)" }
         runningSince = .now
         phase = .running
     }

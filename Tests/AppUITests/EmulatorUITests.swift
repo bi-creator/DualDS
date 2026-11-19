@@ -7,6 +7,7 @@ final class EmulatorUITests: XCTestCase {
     override func setUp() { continueAfterFailure = false }
 
     /// Average colour of the centre region of an element's screenshot.
+    @MainActor
     private func centreColour(of element: XCUIElement) throws -> (r: Double, g: Double, b: Double) {
         let image = try XCTUnwrap(element.screenshot().image.cgImage)
         let w = 8, h = 8

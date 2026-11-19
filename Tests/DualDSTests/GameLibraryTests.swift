@@ -10,12 +10,12 @@ final class GameLibraryTests: XCTestCase {
     private var root: URL!
     private var storage: GameStorage!
 
-    override func setUpWithError() throws {
+    override func setUp() async throws {
         root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
         storage = GameStorage(root: root)
     }
 
-    override func tearDownWithError() throws { try? FileManager.default.removeItem(at: root) }
+    override func tearDown() async throws { try? FileManager.default.removeItem(at: root) }
 
     private func fixtureURL() throws -> URL {
         try XCTUnwrap(Bundle(for: Self.self).url(forResource: "dualds-test", withExtension: "nds"))

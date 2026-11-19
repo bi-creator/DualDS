@@ -8,12 +8,12 @@ import XCTest
 final class AudioRendererTests: XCTestCase {
     private var tmp: URL!
 
-    override func setUpWithError() throws {
+    override func setUp() async throws {
         tmp = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
         try FileManager.default.createDirectory(at: tmp, withIntermediateDirectories: true)
     }
 
-    override func tearDownWithError() throws { try? FileManager.default.removeItem(at: tmp) }
+    override func tearDown() async throws { try? FileManager.default.removeItem(at: tmp) }
 
     private func loadedCore() throws -> DSCore {
         let rom = try XCTUnwrap(Bundle(for: Self.self).url(forResource: "dualds-test", withExtension: "nds"))
@@ -50,7 +50,7 @@ final class AudioRendererTests: XCTestCase {
         try core.start()
         defer { core.stop() }
         let audio = AudioRenderer(core: core)
-        do { try audio.start() } catch {
+        do { try await audio.start() } catch {
             throw XCTSkip("No audio output available in this environment: \(error)")
         }
         try await Task.sleep(for: .seconds(2))

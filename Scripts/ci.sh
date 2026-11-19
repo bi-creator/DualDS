@@ -38,6 +38,8 @@ sim_test() {
   run_logged app-test-sim xcodebuild -project DualDS.xcodeproj -scheme DualDS -configuration Debug \
     -destination "id=$(sim_dest)" -derivedDataPath "$DERIVED" -resultBundlePath "$ROOT/Build/logs/app-test-sim.xcresult" \
     CODE_SIGNING_ALLOWED=NO test
+  # Compiler warnings in app/test sources and runtime warnings reported against test files.
+  run_logged warnings-test no_source_warnings app-test-sim
 }
 
 # Boots the simulator, installs and launches the last Debug build, saves Build/logs/sim-screenshot.png.

@@ -83,12 +83,15 @@ final class AudioRenderer {
 
     /// Starts audio output. Throws if the audio session or engine cannot start; the emulator keeps
     /// running silently in that case (the caller reports it).
-    func start() throws {
+    func start() async throws {
         wantsToRun = true
-        let session = AVAudioSession.sharedInstance()
-        try session.setCategory(.playback, mode: .default, options: [])
-        try? session.setPreferredIOBufferDuration(0.005)
-        try session.setActive(true)
+        // Activating the session can block, so it happens off the main thread.
+        try await Task.detached(priority: .userInitiated) {
+            let session = AVAudioSession.sharedInstance()
+            try session.setCategory(.playback, mode: .default, options: [])
+            try? session.setPreferredIOBufferDuration(0.005)
+            try session.setActive(true)
+        }.value
 
         if source == nil {
             let format = AVAudioFormat(standardFormatWithSampleRate: pipe.core.audioSampleRate, channels: 2)!
@@ -121,14 +124,19 @@ final class AudioRenderer {
         isRunning = false
         observers.forEach(NotificationCenter.default.removeObserver)
         observers.removeAll()
-        try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+        Task.detached(priority: .utility) {
+            try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+        }
     }
 
     private func restartIfWanted() {
         guard wantsToRun, !engine.isRunning else { return }
-        try? AVAudioSession.sharedInstance().setActive(true)
-        engine.prepare()
-        isRunning = (try? engine.start()) != nil
+        Task { @MainActor [weak self] in
+            _ = try? await Task.detached(priority: .userInitiated) { try AVAudioSession.sharedInstance().setActive(true) }.value
+            guard let self, self.wantsToRun, !self.engine.isRunning else { return }
+            self.engine.prepare()
+            self.isRunning = (try? self.engine.start()) != nil
+        }
     }
 
     private func observe() {
