@@ -8,7 +8,7 @@
 │ Rendering/  Metal: MTKView draws latest frame (display link) │
 │ Audio:      AVAudioEngine + AVAudioSourceNode (render thread)│
 ├──────────────────────────────────────────────────────────────┤
-│ EmulatorBridge/  Objective-C++  (DSCoreBridge)    [Phase 2]  │
+│ EmulatorBridge/  Objective-C++  (DSCoreBridge → `DSCore`)    │
 │   Swift-visible NSObject API; converts types, no logic       │
 ├──────────────────────────────────────────────────────────────┤
 │ EmulatorCore/DualDSCore  portable C++20       emulation thread│

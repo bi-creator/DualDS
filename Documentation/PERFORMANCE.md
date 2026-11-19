@@ -5,6 +5,7 @@ nothing about iPhone performance. They are kept only as a regression baseline fo
 
 | Date | Machine | Build | Workload | Result |
 |---|---|---|---|---|
+| 2026-11-19 | Mac mini M5 Pro (host, macOS) | Apple clang Release, interpreter | DualDS test ROM | paced 59.82 fps; fast-forward ≈ 978 fps |
 | 2026-11-19 | Linux VM, 2 vCPU x86-64 | clang Release, no LTO, interpreter | DualDS test ROM (2D only, trivial) | paced 59.77 fps (target 59.83); fast-forward ≈ 414 fps |
 
 Known costs to measure on device (Phase 11, with Instruments):

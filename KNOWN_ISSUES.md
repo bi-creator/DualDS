@@ -2,7 +2,9 @@
 
 | Area | Status |
 |---|---|
-| ObjC++ bridge / in-app emulation | Not started (Phase 2). |
+| In-app emulator screen | Core and bridge work in the app process (tested), but there is no emulator UI yet (Phase 4). |
+| Core LTO | Static core libraries are built without LTO (bitcode breaks `-create-xcframework`). Re-evaluate in Phase 11. |
+| Physical device | Not yet run on hardware. |
 | Game import | Button and file picker only; importing is Phase 3. |
 | JIT | Compiled out. App Store apps cannot use JIT, so the interpreter's performance is the ceiling. |
 | BIOS / firmware | FreeBIOS + generated firmware only. Direct boot always; no firmware menu. Firmware settings (nickname, language) are not persisted yet. |

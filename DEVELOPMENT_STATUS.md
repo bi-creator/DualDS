@@ -6,7 +6,7 @@ Last updated: 2026-11-19
 |---|---|
 | 0. Investigation (melonDS, eDuo, licensing) | ✅ Done. See Documentation/LICENSING_REPORT.md, ARCHITECTURE.md |
 | 1. Project foundation | ✅ Builds and passes all tests on the iOS Simulator (Xcode 27.2) |
-| 2. melonDS core integration | 🟡 Portable core layer done and tested headless; iOS libraries scripted, not built; ObjC++ bridge not started |
+| 2. melonDS core integration | 🟡 Core + ObjC++ bridge built for iOS and tested in the Simulator; **physical-device run pending** (needs signing + an iPhone/iPad) |
 | 3–15 | ⬜ Not started |
 
 ## Phase 0: investigation
@@ -49,8 +49,19 @@ Created: `project.yml` (XcodeGen), `Config/*.xcconfig`, `App/`, `Features/{Libra
   * reset re-boots the ROM
   * threaded pacing at 59.77 fps; pause holds, resume continues; fast-forward runs faster
 * Warnings in DualDS code: 0 (`-Wall -Wextra`).
-* Not done: iOS/Simulator library build (`Scripts/build-core.sh`, unrun), `DSCoreBridge` (ObjC++),
-  loading a game inside the app.
+* Mac host run (Apple clang, M5 Pro): all core checks pass; paced 59.82 fps; fast-forward 978 fps
+  on the trivial test ROM.
+* `Build/DualDSCore.xcframework` (ios-arm64 + ios-arm64-simulator, static, LTO off) built by
+  `Scripts/build-core.sh` in ~13 s.
+* `EmulatorBridge/DSCoreBridge.{h,mm}`: Objective-C API (`DSCore` in Swift) over DSSession. It does
+  type and error conversion only; callbacks are atomic properties.
+* `Tests/DualDSTests/EmulatorBridgeTests.swift`: 8 integration tests running the real core in the
+  iOS Simulator app process (iPhone Duo, iOS 27.2). **All pass**: rejects bad files, boots,
+  pixel-exact screens, A button, 48 kHz audio, exact save-state round-trip, corrupt-state
+  recovery, threaded pacing (55–63 fps window), pause/resume.
+* Full suite: 12 unit + 2 UI tests, `** TEST SUCCEEDED **`.
+* Remaining for Phase 2: run the same tests on a physical device (needs DEVELOPMENT_TEAM and a
+  connected iPhone/iPad).
 
 ## Outstanding issues
 
@@ -58,6 +69,6 @@ See KNOWN_ISSUES.md. Owner decisions are listed in LICENSING_REPORT.md §6.
 
 ## Next steps
 
-1. `Scripts/ci.sh core`: host tests with Apple clang plus the iOS/Simulator xcframework.
-2. Phase 2 bridge: `DSCoreBridge` (ObjC++) over `DSSession`, then boot the test ROM inside the
-   Simulator and on a device.
+1. Physical-device test run (signing).
+2. Phase 3: game import + library (header parsing, security-scoped copy, duplicates, persistence).
+3. Phase 4: Metal dual-screen renderer + emulator screen, so a game is visible in the app.

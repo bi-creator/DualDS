@@ -8,6 +8,9 @@ WHICH="${1:-all}"
 CONFIG="${2:-Release}"
 DEPLOY=17.0
 
+# LTO is off: LTO objects are LLVM bitcode, which xcodebuild -create-xcframework cannot
+# identify ("Unknown header: 0xb17c0de"). Revisit with Phase 11 measurements.
+# -Wno-dev silences CMake author warnings from upstream teakra's CMakeLists only.
 build_sdk() {
   local sdk="$1"
   local bdir="$ROOT/Build/core-$sdk"
@@ -20,7 +23,8 @@ build_sdk() {
     -DCMAKE_BUILD_TYPE="$CONFIG" \
     -DCMAKE_C_COMPILER="$(xcrun --sdk "$sdk" -f clang)" \
     -DCMAKE_CXX_COMPILER="$(xcrun --sdk "$sdk" -f clang++)" \
-    -DENABLE_LTO_RELEASE=ON \
+    -DENABLE_LTO_RELEASE=OFF \
+    -Wno-dev \
     "-DCMAKE_C_FLAGS=-ffile-prefix-map=$ROOT=DualDS" \
     "-DCMAKE_CXX_FLAGS=-ffile-prefix-map=$ROOT=DualDS"
   cmake --build "$bdir" --target dualdscore core teakra
