@@ -1,0 +1,3 @@
+[submodule "EmulatorCore/melonDS"]
+	path = EmulatorCore/melonDS
+	url = https://github.com/melonDS-emu/melonDS.git

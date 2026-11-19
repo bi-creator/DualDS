@@ -1,0 +1,7 @@
+// DualDS shared build settings.
+// Signing identity and bundle ID live in Signing.local.xcconfig (git-ignored) so each developer
+// can build with their own Apple team. Copy Signing.template.xcconfig to create it.
+DUALDS_BUNDLE_ID = com.example.dualds
+DEVELOPMENT_TEAM =
+
+#include? "Signing.local.xcconfig"

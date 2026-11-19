@@ -1,0 +1,96 @@
+# XcodeGen spec for DualDS. Generate the Xcode project with:  Scripts/bootstrap.sh
+# (or `xcodegen generate`). DualDS.xcodeproj is generated from this file — edit this, not the project.
+name: DualDS
+options:
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+  developmentLanguage: en
+  xcodeVersion: "16.0"
+configFiles:
+  Debug: Config/Base.xcconfig
+  Release: Config/Base.xcconfig
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    SWIFT_TREAT_WARNINGS_AS_ERRORS: YES
+    GCC_TREAT_WARNINGS_AS_ERRORS: YES
+    CLANG_CXX_LANGUAGE_STANDARD: c++20
+    CLANG_CXX_LIBRARY: libc++
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    CODE_SIGN_STYLE: Automatic
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+targets:
+  DualDS:
+    type: application
+    platform: iOS
+    sources:
+      - path: App
+      - path: Features
+      - path: Resources
+    info:
+      path: App/Info.plist
+      properties:
+        CFBundleDisplayName: DualDS
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        LSRequiresIPhoneOS: true
+        UILaunchScreen: {}
+        UIApplicationSupportsIndirectInputEvents: true
+        UIRequiresFullScreen: false
+        ITSAppUsesNonExemptEncryption: false
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UTImportedTypeDeclarations:
+          - UTTypeIdentifier: com.dualds.nds-rom
+            UTTypeDescription: Nintendo DS ROM
+            UTTypeConformsTo: [public.data]
+            UTTypeTagSpecification:
+              public.filename-extension: [nds]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(DUALDS_BUNDLE_ID)
+        TARGETED_DEVICE_FAMILY: "1,2"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+  DualDSTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [Tests/DualDSTests]
+    dependencies:
+      - target: DualDS
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(DUALDS_BUNDLE_ID).tests
+        GENERATE_INFOPLIST_FILE: YES
+  DualDSUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [Tests/AppUITests]
+    dependencies:
+      - target: DualDS
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(DUALDS_BUNDLE_ID).uitests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: DualDS
+schemes:
+  DualDS:
+    build:
+      targets:
+        DualDS: all
+    test:
+      config: Debug
+      gatherCoverageData: true
+      targets:
+        - DualDSTests
+        - DualDSUITests

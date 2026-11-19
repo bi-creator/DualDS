@@ -1,0 +1,4 @@
+// Copy to Config/Signing.local.xcconfig (git-ignored) and fill in.
+// Your 10-character Team ID: Xcode > Settings > Accounts, or developer.apple.com > Membership.
+DEVELOPMENT_TEAM = YOURTEAMID
+DUALDS_BUNDLE_ID = com.yourname.dualds

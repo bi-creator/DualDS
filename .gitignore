@@ -1,0 +1,29 @@
+# Build products
+/Build/
+DerivedData/
+*.xcresult
+.build/
+
+# Xcode user state
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+
+# Local signing (never commit)
+Config/Signing.local.xcconfig
+
+# Never commit game files, BIOS, firmware or saves
+*.nds
+*.dsi
+*.srl
+*.sav
+*.mln
+*.ml[0-9]
+bios7.bin
+bios9.bin
+firmware.bin
+# ...except DualDS's own original test fixture
+!/Tests/Fixtures/testrom/dualds-test.nds
+
+# macOS
+.DS_Store
