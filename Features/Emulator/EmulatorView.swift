@@ -11,6 +11,7 @@ struct EmulatorView: View {
     @Environment(\.displayScale) private var displayScale
     @State private var model: EmulatorViewModel
     @State private var showingDisplaySettings = false
+    @State private var showingSaveStates = false
 
     @AppStorage("display.arrangement") private var arrangement = DSScreenLayout.Arrangement.vertical
     @AppStorage("display.scaling") private var scaling = DSScreenLayout.Scaling.aspectFit
@@ -21,6 +22,7 @@ struct EmulatorView: View {
     @AppStorage("audio.volume") private var volume = 1.0
     @AppStorage("audio.muted") private var muted = false
     @AppStorage("display.shellTheme") private var shellTheme = ShellTheme.lilac
+    @AppStorage("controls.style") private var controllerStyle = ControllerStyle.clamshell
     @AppStorage("display.duoLayout") private var duoMode = DuoLayoutMode.automatic
     @State private var hinge: HingeState = .unavailable
     @State private var hingeAngle = 0.0
@@ -28,6 +30,8 @@ struct EmulatorView: View {
     init(game: Game, storage: GameStorage) {
         _model = State(initialValue: EmulatorViewModel(game: game, storage: storage))
     }
+
+    private var palette: ShellPalette { controllerStyle.palette(clamshellTheme: shellTheme) }
 
     private var layout: DSScreenLayout {
         DSScreenLayout(arrangement: arrangement, scaling: scaling, gap: gap, swapScreens: swapScreens)
@@ -37,7 +41,7 @@ struct EmulatorView: View {
         GeometryReader { geo in
             let landscape = geo.size.width > geo.size.height
             ZStack {
-                shellTheme.palette.shell.ignoresSafeArea()
+                palette.shell.ignoresSafeArea()
                 if let fold = DuoPosture.fold(in: geo, mode: duoMode, hinge: hinge) {
                     clamshellBody(DuoClamshellLayout.make(bounds: CGRect(origin: .zero, size: geo.size), fold: fold,
                                                           scale: displayScale))
@@ -50,7 +54,7 @@ struct EmulatorView: View {
             }
         }
         .modifier(HingeObserver(state: $hinge, angle: $hingeAngle))
-        .environment(\.shellPalette, shellTheme.palette)
+        .environment(\.shellPalette, palette)
         .statusBarHidden()
         .persistentSystemOverlays(.hidden)
         .task {
@@ -63,6 +67,22 @@ struct EmulatorView: View {
             if phase == .active { model.appBecameActive() } else { model.appBecameInactive() }
         }
         .sheet(isPresented: $showingDisplaySettings) { displaySettings }
+        .sheet(isPresented: $showingSaveStates, onDismiss: { model.resumeAfterMenu() }) {
+            SaveStatesView(model: model).onAppear { model.pauseForMenu() }
+        }
+        .alert("Save States", isPresented: Binding(get: { model.stateError != nil && !showingSaveStates },
+                                                  set: { if !$0 { model.stateError = nil } })) {
+            Button("OK", role: .cancel) {}
+        } message: { Text(model.stateError ?? "") }
+        .overlay(alignment: .top) {
+            if let toast = model.toast {
+                Text(toast).font(.subheadline.weight(.semibold)).padding(.horizontal, 14).padding(.vertical, 8)
+                    .background(.ultraThinMaterial, in: .capsule).padding(.top, 48)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .accessibilityIdentifier("emulator.toast")
+            }
+        }
+        .animation(.easeOut(duration: 0.2), value: model.toast)
     }
 
     private var screens: some View {
@@ -78,8 +98,14 @@ struct EmulatorView: View {
             screens
             if controlsVisible {
                 VStack(spacing: 12) {
-                    HStack { ShoulderButton(title: "L", button: .L, onChange: press); Spacer(); ShoulderButton(title: "R", button: .R, onChange: press) }
-                    HStack { DPadView(onChange: press); Spacer(); FaceButtonsView(onChange: press) }
+                    if controllerStyle.hasShoulderButtons {
+                        HStack {
+                            ShoulderButton(title: "L", button: .L, style: controllerStyle, onChange: press)
+                            Spacer()
+                            ShoulderButton(title: "R", button: .R, style: controllerStyle, onChange: press)
+                        }
+                    }
+                    HStack { DirectionalControl(style: controllerStyle, onChange: press); Spacer(); FaceControl(style: controllerStyle, onChange: press) }
                     HStack(spacing: 24) { SystemButton(title: "SELECT", button: .select, onChange: press); SystemButton(title: "START", button: .start, onChange: press) }
                 }
                 .padding(.horizontal, 20)
@@ -92,7 +118,7 @@ struct EmulatorView: View {
     private func clamshellBody(_ c: DuoClamshellLayout) -> some View {
         ZStack(alignment: .topLeading) {
             // Hinge band across the crease.
-            Rectangle().fill(shellTheme.palette.shellEdge)
+            Rectangle().fill(palette.shellEdge)
                 .frame(width: c.upperArea.width + 400, height: max(10, c.lowerArea.minY - c.upperArea.maxY + 10))
                 .position(x: c.upperArea.midX, y: (c.upperArea.maxY + c.lowerArea.minY) / 2)
             ScreenBezel(rect: c.topScreen)
@@ -113,21 +139,23 @@ struct EmulatorView: View {
 
             if controlsVisible {
                 let s = c.controlScale
-                let shoulderY = c.lowerArea.minY + DuoClamshellLayout.shoulderRowHeight / 2 + 4
-                ShoulderButton(title: "L", button: .L, onChange: press).scaleEffect(s)
-                    .position(x: c.leftColumn.midX, y: shoulderY)
-                ShoulderButton(title: "R", button: .R, onChange: press).scaleEffect(s)
-                    .position(x: c.rightColumn.midX, y: shoulderY)
-                DPadView(onChange: press).scaleEffect(s)
-                    .position(x: c.leftColumn.midX, y: c.leftColumn.midY + 6)
-                FaceButtonsView(onChange: press).scaleEffect(s)
-                    .position(x: c.rightColumn.midX, y: c.rightColumn.midY - 4)
-                VStack(spacing: 10 * s) {
+                let shoulderY = c.lowerArea.minY + DuoClamshellLayout.shoulderRowHeight / 2 + 2
+                if controllerStyle.hasShoulderButtons {
+                    ShoulderButton(title: "L", button: .L, style: controllerStyle, onChange: press).scaleEffect(min(s, 1.1))
+                        .position(x: c.leftColumn.midX, y: shoulderY)
+                    ShoulderButton(title: "R", button: .R, style: controllerStyle, onChange: press).scaleEffect(min(s, 1.1))
+                        .position(x: c.rightColumn.midX, y: shoulderY)
+                }
+                DirectionalControl(style: controllerStyle, onChange: press).scaleEffect(s)
+                    .position(x: c.leftColumn.midX, y: c.clusterCentreY)
+                FaceControl(style: controllerStyle, onChange: press).scaleEffect(s)
+                    .position(x: c.rightColumn.midX, y: c.clusterCentreY)
+                HStack(spacing: 18) {
                     SystemButton(title: "SELECT", button: .select, onChange: press)
                     SystemButton(title: "START", button: .start, onChange: press)
                 }
-                .scaleEffect(s)
-                .position(x: c.rightColumn.midX, y: c.lowerArea.maxY - DuoClamshellLayout.systemRowHeight * s - 8)
+                .scaleEffect(min(1, max(0.8, s)))
+                .position(x: c.systemRow.midX, y: c.systemRow.midY)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -137,9 +165,9 @@ struct EmulatorView: View {
         HStack(spacing: 0) {
             if controlsVisible {
                 VStack(spacing: 18) {
-                    ShoulderButton(title: "L", button: .L, onChange: press)
+                    if controllerStyle.hasShoulderButtons { ShoulderButton(title: "L", button: .L, style: controllerStyle, onChange: press) }
                     Spacer()
-                    DPadView(onChange: press)
+                    DirectionalControl(style: controllerStyle, onChange: press)
                     Spacer()
                     SystemButton(title: "SELECT", button: .select, onChange: press)
                 }
@@ -148,9 +176,9 @@ struct EmulatorView: View {
             VStack(spacing: 0) { toolbar.padding(.horizontal, 8); screens }
             if controlsVisible {
                 VStack(spacing: 18) {
-                    ShoulderButton(title: "R", button: .R, onChange: press)
+                    if controllerStyle.hasShoulderButtons { ShoulderButton(title: "R", button: .R, style: controllerStyle, onChange: press) }
                     Spacer()
-                    FaceButtonsView(onChange: press)
+                    FaceControl(style: controllerStyle, onChange: press)
                     Spacer()
                     SystemButton(title: "START", button: .start, onChange: press)
                 }
@@ -178,19 +206,26 @@ struct EmulatorView: View {
             TimelineView(.periodic(from: .now, by: 0.5)) { _ in
                 Text(model.phase == .running ? String(format: "%.0f fps", model.core.measuredFPS) : "")
                     .font(.caption.monospacedDigit())
-                    .foregroundStyle(shellTheme.palette.chrome.opacity(0.6))
+                    .foregroundStyle(palette.chrome.opacity(0.6))
                     .accessibilityIdentifier("emulator.fps")
             }
             Menu {
+                Button("Quick Save", systemImage: "square.and.arrow.down") { Task { await model.quickSave(context: context) } }
+                Button("Quick Load", systemImage: "square.and.arrow.up") { Task { await model.quickLoad(context: context) } }
+                Button("Save States…", systemImage: "square.stack.3d.up") { showingSaveStates = true }
+                Divider()
                 Button("Reset Game", systemImage: "arrow.counterclockwise") { model.reset() }
                 Button("Display…", systemImage: "rectangle.split.1x2") { showingDisplaySettings = true }
+                Picker("Controller Layout", selection: $controllerStyle) {
+                    ForEach(ControllerStyle.allCases) { Text($0.rawValue).tag($0) }
+                }
                 Toggle("Show Controls", isOn: $controlsVisible)
                 Toggle("Mute Sound", isOn: $muted)
             } label: { Image(systemName: "ellipsis.circle") }
             .accessibilityIdentifier("emulator.menu")
         }
         .font(.title3)
-        .foregroundStyle(shellTheme.palette.chrome)
+        .foregroundStyle(palette.chrome)
         .frame(height: 40)
     }
 
@@ -228,7 +263,18 @@ struct EmulatorView: View {
     private var displaySettings: some View {
         NavigationStack {
             Form {
-                Picker("Theme", selection: $shellTheme) { ForEach(ShellTheme.allCases) { Text($0.rawValue).tag($0) } }
+                Section {
+                    Picker("Controller Layout", selection: $controllerStyle) {
+                        ForEach(ControllerStyle.allCases) { style in
+                            VStack(alignment: .leading) { Text(style.rawValue); Text(style.summary).font(.caption).foregroundStyle(.secondary) }
+                                .tag(style)
+                        }
+                    }
+                    .pickerStyle(.inline)
+                    if controllerStyle == .clamshell {
+                        Picker("Colour", selection: $shellTheme) { ForEach(ShellTheme.allCases) { Text($0.rawValue).tag($0) } }
+                    }
+                }
                 Picker("Arrangement", selection: $arrangement) { ForEach(DSScreenLayout.Arrangement.allCases) { Text($0.rawValue).tag($0) } }
                 Picker("Scaling", selection: $scaling) { ForEach(DSScreenLayout.Scaling.allCases) { Text($0.rawValue).tag($0) } }
                 Picker("Filter", selection: $filter) { ForEach(ScreenFilter.allCases) { Text($0.rawValue).tag($0) } }
@@ -247,7 +293,7 @@ struct EmulatorView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { showingDisplaySettings = false } } }
         }
-        .presentationDetents([.medium])
+        .presentationDetents([.medium, .large])
     }
 
     private func press(_ button: DSButton, _ pressed: Bool) { model.setButton(button, pressed: pressed) }

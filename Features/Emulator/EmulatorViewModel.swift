@@ -16,6 +16,12 @@ final class EmulatorViewModel {
     private(set) var audioError: String?
     let game: Game
     let storage: GameStorage
+    let saveStates: SaveStateStore
+    /// Short confirmation shown over the game ("Saved to Slot 2").
+    private(set) var toast: String?
+    /// Error from the last save-state operation, shown as an alert.
+    var stateError: String?
+    private(set) var isWorkingOnState = false
     private(set) var phase: Phase = .loading
     private(set) var isFastForward = false
     /// Paused by the user (as opposed to by the app going to the background).
@@ -26,6 +32,71 @@ final class EmulatorViewModel {
         self.game = game
         self.storage = storage
         self.audio = AudioRenderer(core: core)
+        self.saveStates = SaveStateStore(storage: storage)
+    }
+
+    // MARK: Save states
+
+    func saveState(slot: Int, context: ModelContext) async {
+        guard !isWorkingOnState else { return }
+        isWorkingOnState = true
+        defer { isWorkingOnState = false }
+        do {
+            let state = try await saveStates.save(core: core, game: game, slot: slot, context: context)
+            show("Saved to \(state.name)")
+        } catch {
+            stateError = "Could not save: \(Self.message(for: error))"
+        }
+    }
+
+    /// Returns true if the state was restored.
+    @discardableResult
+    func loadState(_ state: SaveState) async -> Bool {
+        guard !isWorkingOnState else { return false }
+        isWorkingOnState = true
+        defer { isWorkingOnState = false }
+        do {
+            try await saveStates.load(state, into: core, game: game)
+            show("Loaded \(state.name)")
+            return true
+        } catch {
+            var message = "Could not load \(state.name): \(Self.message(for: error))"
+            if state.coreVersion != DSCore.melonDSVersion {
+                message += " It was saved with melonDS \(state.coreVersion); this is \(DSCore.melonDSVersion)."
+            }
+            stateError = message + " The game continues where it was."
+            return false
+        }
+    }
+
+    func quickSave(context: ModelContext) async { await saveState(slot: SaveStateStore.quickSlot, context: context) }
+
+    func quickLoad(context: ModelContext) async {
+        guard let state = saveStates.state(for: game, slot: SaveStateStore.quickSlot, context: context) else {
+            stateError = "There is no Quick Save for this game yet."
+            return
+        }
+        await loadState(state)
+    }
+
+    /// Pause while a menu covers the game; `resumeAfterMenu` restores the previous state.
+    func pauseForMenu() { appBecameInactive() }
+    func resumeAfterMenu() { appBecameActive() }
+
+    private static var toastDuration: Duration {
+        #if DEBUG
+        // UI tests poll about once a second after the app goes idle; keep confirmations around longer.
+        if ProcessInfo.processInfo.environment["DUALDS_UITEST_FRESH"] == "1" { return .seconds(8) }
+        #endif
+        return .milliseconds(2500)
+    }
+
+    private func show(_ message: String) {
+        toast = message
+        Task { @MainActor [weak self] in
+            try? await Task.sleep(for: Self.toastDuration)
+            if self?.toast == message { self?.toast = nil }
+        }
     }
 
     func start(context: ModelContext) async {

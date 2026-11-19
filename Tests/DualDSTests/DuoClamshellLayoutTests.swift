@@ -29,7 +29,13 @@ final class DuoClamshellLayoutTests: XCTestCase {
         XCTAssertLessThanOrEqual(c.leftColumn.maxX, c.bottomScreen.minX + 0.5)
         XCTAssertGreaterThanOrEqual(c.rightColumn.minX, c.bottomScreen.maxX - 0.5)
         XCTAssertEqual(c.bottomScreen.midX, bounds.midX, accuracy: 1)
-        XCTAssertGreaterThan(c.controlScale, 0.9)
+        XCTAssertGreaterThan(c.controlScale, 0.8)
+        XCTAssertGreaterThanOrEqual(c.bottomScreen.width, bounds.width * 0.5, "touch screen gets about half the width")
+        XCTAssertGreaterThanOrEqual(c.bottomScreen.minY, fold.maxY + 22 - 0.5, "touch screen clears the hinge")
+        let above = c.bottomScreen.minY - (fold.maxY + 22), below = c.lowerArea.maxY - 10 - c.systemRow.maxY
+        XCTAssertEqual(above, below, accuracy: 2, "touch screen and Start/Select are centred in the lower half")
+        XCTAssertGreaterThanOrEqual(c.systemRow.minY, c.bottomScreen.maxY, "Start/Select below the touch screen")
+        XCTAssertLessThanOrEqual(c.systemRow.maxY, c.lowerArea.maxY)
     }
 
     func testToolbarStaysInTheUpperHalf() {

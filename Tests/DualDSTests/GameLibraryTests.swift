@@ -22,7 +22,7 @@ final class GameLibraryTests: XCTestCase {
     }
 
     private func makeContext() throws -> ModelContext {
-        let container = try ModelContainer(for: Game.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+        let container = try ModelContainer(for: Game.self, SaveState.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))
         return ModelContext(container)
     }
 

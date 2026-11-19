@@ -12,7 +12,8 @@ Last updated: 2026-11-19
 | 5. Input | 🟡 On-screen controls + touch screen work; controller support, editing, sizing pending |
 | 10. iPhone Duo / foldable adaptation | 🟡 DS clamshell layout for the folded (~90°) Duo, plus flat-open split; verified with a simulated fold. Pending: real fold in Simulator/device |
 | 6. Audio | ✅ AVAudioEngine output, latency cap, interruptions and route changes, mute/volume; tests pass (Simulator) |
-| 7–9, 11–15 | ⬜ Not started |
+| 7. Saves and save states | ✅ Battery saves (auto, atomic); save-state slots with screenshots, rename/delete, Quick Save/Load; tests pass |
+| 8–9, 11–15 | ⬜ Not started (Bluetooth controllers deferred by owner) |
 
 ## Phase 0: investigation
 
@@ -147,6 +148,37 @@ Created: `project.yml` (XcodeGen), `Config/*.xcconfig`, `App/`, `Features/{Libra
 * Tests: `AudioRendererTests` (latency cap and silence padding; live AVAudioEngine output: >60k
   SPU frames in 2 s, <20% silence, nothing rendered while paused). **Both pass on the Simulator.**
   Full suite: 40 unit + 5 UI.
+
+## Fold layout tuning and controller styles (owner request, 2026-11-19)
+
+* Lower half: the touch screen takes ~54% of the width (DS Lite proportions). The touch screen
+  and Start/Select row are centred vertically below the hinge, with the controls level with the
+  screen and scaled to their columns. Hit areas are 4 pt larger than the drawn buttons.
+* D-pad is now one control: press or slide anywhere on it, diagonals included (8-way).
+* Switchable controller layouts (`ControllerStyle`, in-game menu → Controller Layout, or Display
+  settings). All are original designs that evoke classic families without copying any product:
+  * Clamshell: cross D-pad, diamond ABXY, follows the colour theme
+  * Pocket: warm-grey body, two big diagonal A/B, small X/Y
+  * Arcade: 8-way stick, six-button panel (Y X L / B A R)
+  * Pro Pad: graphite body, wide L/R triggers, colour-coded face letters
+* UI test `testEveryControllerStyleLaysOutAroundTheTouchScreen` checks each style's layout
+  (directional control left of the touch screen, ABXY right, L/R and Start/Select present) and
+  saves a screenshot of each.
+
+## Phase 7: saves and save states
+
+* Battery saves: written by the core after 1 s of quiet and on pause/stop, via tmp + rename
+  (Phase 2); shown as "Save data" in game details.
+* Save states (`Models/SaveState.swift`, `Services/SaveStateStore.swift`,
+  `Features/SaveStates/SaveStateView.swift`): Quick slot plus 8 manual slots per game. Each
+  stores the melonDS state file, a 256×384 screenshot of both screens, a timestamp, a renameable
+  name and the core version. Saving or loading runs off the main thread. A slot is replaced only
+  after the new state is written. Loading checks the game and that the file exists, and the core
+  rolls back if a file is rejected. Errors are shown with a version hint, and the game continues.
+* Emulator menu: Quick Save, Quick Load, Save States… (the game pauses while the sheet is open).
+  Deleting a game removes its states.
+* Tests: `SaveStateStoreTests` (5, real core and files) and `testSaveAndLoadAStateFromTheMenu`
+  (slot save/load and Quick Save/Load end to end). **All pass.**
 
 ## Repository
 

@@ -40,6 +40,9 @@ struct ShellPalette {
     var buttonPressed: Color
     var label: Color          // text/glyphs on buttons
     var chrome: Color         // toolbar icons, captions on the shell
+    /// Per-button colours (fill, or letter colour when `tintLabelsOnly`).
+    var faceTints: [DSButton: Color] = [:]
+    var tintLabelsOnly = false
 }
 
 private struct ShellPaletteKey: EnvironmentKey {

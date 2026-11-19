@@ -17,6 +17,10 @@ struct GameDetailView: View {
     @State private var photo: PhotosPickerItem?
     @State private var errorMessage: String?
 
+    private var saveStateCount: Int {
+        SaveStateStore.states(for: game.id, context: context).count
+    }
+
     var body: some View {
         NavigationStack {
             Form {
@@ -55,6 +59,7 @@ struct GameDetailView: View {
                     LabeledContent("Play time", value: Self.playTime(game.playTime))
                     LabeledContent("Save data", value: model.hasSaveData(game) ? "Yes" : "None yet")
                         .accessibilityIdentifier("detail.saveData")
+                    LabeledContent("Save states", value: "\(saveStateCount)")
                 }
                 Section("Artwork") {
                     PhotosPicker(selection: $photo, matching: .images) {

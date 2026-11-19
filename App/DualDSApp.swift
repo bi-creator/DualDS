@@ -13,7 +13,7 @@ struct DualDSApp: App {
         do {
             let config = ModelConfiguration(url: storage.root.appendingPathComponent("Library.store"))
             try storage.createDirectories()
-            container = try ModelContainer(for: Game.self, configurations: config)
+            container = try ModelContainer(for: Game.self, SaveState.self, configurations: config)
         } catch {
             // Without its library database the app cannot work; fail loudly rather than run degraded.
             fatalError("DualDS could not open its library database: \(error)")

@@ -126,6 +126,9 @@ final class GameLibraryViewModel {
         where fm.fileExists(atPath: url.path) {
             try fm.removeItem(at: url)
         }
+        for state in SaveStateStore.states(for: game.id, context: context) {
+            context.delete(state)
+        }
         context.delete(game)
         try context.save()
     }
