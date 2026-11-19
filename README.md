@@ -4,7 +4,7 @@ A native Nintendo DS emulator for iPhone and iPad, built on the [melonDS](https:
 emulation core, with a SwiftUI frontend and Metal rendering.
 
 > **Status: early development.** The emulator core layer runs and passes its tests headless.
-> The iOS app shell has not been compiled yet. See [DEVELOPMENT_STATUS.md](DEVELOPMENT_STATUS.md).
+> The iOS app shell builds and passes its tests on the Simulator; the core is not yet wired into the app. See [DEVELOPMENT_STATUS.md](DEVELOPMENT_STATUS.md).
 
 DualDS includes **no games, BIOS or firmware**. You import `.nds` files that you legally own.
 DualDS is not affiliated with Nintendo.

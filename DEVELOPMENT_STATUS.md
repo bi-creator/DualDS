@@ -5,7 +5,7 @@ Last updated: 2026-11-19
 | Phase | Status |
 |---|---|
 | 0. Investigation (melonDS, eDuo, licensing) | ✅ Done. See Documentation/LICENSING_REPORT.md, ARCHITECTURE.md |
-| 1. Project foundation | 🟡 Written; **blocked on first Xcode build** (needs the Mac) |
+| 1. Project foundation | ✅ Builds and passes all tests on the iOS Simulator (Xcode 27.2) |
 | 2. melonDS core integration | 🟡 Portable core layer done and tested headless; iOS libraries scripted, not built; ObjC++ bridge not started |
 | 3–15 | ⬜ Not started |
 
@@ -24,8 +24,11 @@ Created: `project.yml` (XcodeGen), `Config/*.xcconfig`, `App/`, `Features/{Libra
 `Tests/AppUITests`, `Scripts/{bootstrap,ci,lib,verify-licenses,generate-notices}.sh`, docs,
 `.gitignore`, `LICENSE`.
 
-* Build status: **not yet built**. The dev VM has no Xcode or Swift. Next step is
-  `Scripts/bootstrap.sh && Scripts/ci.sh phase1` on the Mac.
+* Build status (2026-11-19, Mac mini M5 Pro, Xcode 27.2 / build 27B52, iOS 27.2 Simulator,
+  device **iPhone Duo**): `** BUILD SUCCEEDED **` with 0 compiler errors or warnings (warnings are errors);
+  4/4 unit tests and 2/2 UI tests pass (`Build/logs/app-test-sim.log`). The app launches and
+  `sim-run` captured both Duo displays; the library renders on display 1 (1398×2034), display 3
+  (2007×2853) was dark at capture time.
 * Tests written: 4 unit tests (UTType declaration, bundled licences, GPL text, commit SHA) and
   2 UI tests (first launch shows branding/import/settings; Settings → About → melonDS licence).
 * `verify-licenses.sh`: all 8 checks pass.
@@ -55,7 +58,6 @@ See KNOWN_ISSUES.md. Owner decisions are listed in LICENSING_REPORT.md §6.
 
 ## Next steps
 
-1. On the Mac: `Scripts/bootstrap.sh`, `Scripts/ci.sh phase1`; fix anything Xcode reports; commit.
-2. `Scripts/ci.sh core`: host tests with Apple clang plus the iOS/Simulator xcframework.
-3. Phase 2 bridge: `DSCoreBridge` (ObjC++) over `DSSession`, then boot the test ROM inside the
+1. `Scripts/ci.sh core`: host tests with Apple clang plus the iOS/Simulator xcframework.
+2. Phase 2 bridge: `DSCoreBridge` (ObjC++) over `DSSession`, then boot the test ROM inside the
    Simulator and on a device.

@@ -2,7 +2,6 @@
 
 | Area | Status |
 |---|---|
-| iOS app | Phase 1 shell written; **not yet compiled in Xcode** (no Swift toolchain in the dev VM). |
 | ObjC++ bridge / in-app emulation | Not started (Phase 2). |
 | Game import | Button and file picker only; importing is Phase 3. |
 | JIT | Compiled out. App Store apps cannot use JIT, so the interpreter's performance is the ceiling. |
