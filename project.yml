@@ -29,6 +29,8 @@ targets:
     sources:
       - path: App
       - path: Features
+      - path: Models
+      - path: Services
       - path: EmulatorBridge
       - path: Resources
     dependencies:
@@ -86,7 +88,10 @@ targets:
   DualDSUITests:
     type: bundle.ui-testing
     platform: iOS
-    sources: [Tests/AppUITests]
+    sources:
+      - path: Tests/AppUITests
+      - path: Tests/Fixtures/testrom/dualds-test.nds
+        buildPhase: resources
     dependencies:
       - target: DualDS
     settings:

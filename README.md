@@ -28,7 +28,9 @@ Details: [Documentation/BUILDING.md](Documentation/BUILDING.md).
 
 ## Importing games
 
-Use **Import Game** in the Library and choose a `.nds` file from Files. *(Available from Phase 3.)*
+Use **Import Game** (or **+**) in the Library and choose one or more `.nds` files from Files. DualDS checks each
+header, rejects duplicates and DSi-exclusive titles, and copies the file into its own storage; the
+original is left untouched. Delete a game from its details sheet or with a long press.
 
 ## Documentation
 

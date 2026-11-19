@@ -7,7 +7,8 @@ Last updated: 2026-11-19
 | 0. Investigation (melonDS, eDuo, licensing) | ✅ Done. See Documentation/LICENSING_REPORT.md, ARCHITECTURE.md |
 | 1. Project foundation | ✅ Builds and passes all tests on the iOS Simulator (Xcode 27.2) |
 | 2. melonDS core integration | 🟡 Core + ObjC++ bridge built for iOS and tested in the Simulator; **physical-device run pending** (needs signing + an iPhone/iPad) |
-| 3–15 | ⬜ Not started |
+| 3. Game import and library | ✅ Import, validation, dedupe, library, search/sort, details, artwork, delete; tests pass |
+| 4–15 | ⬜ Not started |
 
 ## Phase 0: investigation
 
@@ -63,6 +64,24 @@ Created: `project.yml` (XcodeGen), `Config/*.xcconfig`, `App/`, `Features/{Libra
 * Remaining for Phase 2: run the same tests on a physical device (needs DEVELOPMENT_TEAM and a
   connected iPhone/iPad).
 
+## Phase 3: game import and library
+
+* `Services/ROMHeader.swift`: header parse and validate (header CRC-16, ARM9/ARM7 ranges like
+  melonDS's `ValidateROM`, size limits, DSi-exclusive rejected); banner English title and
+  32×32 icon decoded from the user's ROM.
+* `Services/GameImportService.swift`: security-scoped read, streaming SHA-256, duplicate
+  rejection, free-space check, copy via temp file then move (no partial files), typed errors.
+* `Services/GameStorage.swift`: Application Support/DualDS/{Games,Saves,States,Artwork}.
+* `Models/Game.swift` (SwiftData); `Features/Library/*`: grid, search (title/code), sort
+  (title/last played/recently imported), details (code, maker, size, imported, last played,
+  play time, save data), custom artwork via PhotosPicker, delete (ROM, save, states, artwork).
+* Works offline; no artwork is downloaded or bundled.
+* Tests: 25 unit (`ROMHeaderTests` 7, `GameLibraryTests` 6, `EmulatorBridgeTests` 8, config 4)
+  and 3 UI (first launch ×2, library import → details → delete). **All pass**, iPhone Duo
+  simulator, iOS 27.2.
+* Not yet tracked: last played and play time are stored but only updated once games can be
+  launched (Phase 4).
+
 ## Outstanding issues
 
 See KNOWN_ISSUES.md. Owner decisions are listed in LICENSING_REPORT.md §6.
@@ -70,5 +89,4 @@ See KNOWN_ISSUES.md. Owner decisions are listed in LICENSING_REPORT.md §6.
 ## Next steps
 
 1. Physical-device test run (signing).
-2. Phase 3: game import + library (header parsing, security-scoped copy, duplicates, persistence).
-3. Phase 4: Metal dual-screen renderer + emulator screen, so a game is visible in the app.
+2. Phase 4: Metal dual-screen renderer + emulator screen, so a game is visible in the app.

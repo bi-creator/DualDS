@@ -25,6 +25,8 @@ run_step() {
     sim-test)    Scripts/ci.sh sim-test ;;
     sim-run)     Scripts/ci.sh sim-run ;;
     sim-info)    Scripts/ci.sh sim-info ;;
+    device-build) Scripts/ci.sh device-build ;;
+    push)        git push -u origin HEAD ;;
     commit)      # message comes from Build/requests/commit-message.txt
                  git add -A && git commit -F "$REQ/commit-message.txt" && git log --oneline -1 ;;
     status)      git status --short; git log --oneline -5 ;;
@@ -32,7 +34,7 @@ run_step() {
   esac
 }
 
-echo "DualDS runner watching $REQ (allowed: bootstrap phase1 core host-tests core-ios licenses xcodegen sim-build sim-test sim-run sim-info commit status)"
+echo "DualDS runner watching $REQ (allowed: bootstrap phase1 core host-tests core-ios licenses xcodegen sim-build sim-test sim-run sim-info device-build push commit status)"
 while true; do
   for f in "$REQ"/*.req; do
     [ -e "$f" ] || continue

@@ -1,65 +1,134 @@
-// DualDS — game library screen (Phase 1 shell; import and listing arrive in Phase 3).
+// DualDS — game library screen.
 // Copyright (C) 2026 DualDS contributors. GPL-3.0-or-later.
 
+import SwiftData
 import SwiftUI
 
 struct GameLibraryView: View {
+    @Environment(\.modelContext) private var context
+    @Query private var games: [Game]
+    @State var model: GameLibraryViewModel
+
     @State private var showingImporter = false
     @State private var showingSettings = false
-    @State private var notice: String?
+    @State private var selected: Game?
+    @State private var pendingDelete: Game?
+    @State private var errorMessage: String?
+
+    private let columns = [GridItem(.adaptive(minimum: 150, maximum: 220), spacing: 16)]
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 32) {
-                BrandHeader()
-                    .padding(.top, 24)
+            content
+                .navigationTitle("Library")
+                .searchable(text: $model.searchText, prompt: "Search title or game code")
+                .toolbar { toolbar }
+                .fileImporter(isPresented: $showingImporter, allowedContentTypes: [.ndsROM],
+                              allowsMultipleSelection: true) { result in
+                    switch result {
+                    case .success(let urls): Task { await model.importFiles(urls, into: context) }
+                    case .failure(let error): errorMessage = error.localizedDescription
+                    }
+                }
+                .alert("Import", isPresented: present($model.importReport)) {
+                    Button("OK", role: .cancel) {}
+                } message: { Text(model.importReport ?? "") }
+                .alert("Error", isPresented: present($errorMessage)) {
+                    Button("OK", role: .cancel) {}
+                } message: { Text(errorMessage ?? "") }
+                .confirmationDialog("Delete \(pendingDelete?.title ?? "game")?", isPresented: present($pendingDelete),
+                                    titleVisibility: .visible) {
+                    Button("Delete Game, Saves and States", role: .destructive) {
+                        if let game = pendingDelete { delete(game) }
+                    }
+                } message: {
+                    Text("This removes the game file DualDS copied, its save data and save states from this device.")
+                }
+                .sheet(item: $selected) { game in
+                    GameDetailView(game: game, model: model) { pendingDelete = game }
+                }
+                .sheet(isPresented: $showingSettings) { SettingsView() }
+                .overlay {
+                    if model.isImporting {
+                        ProgressView("Importing…").padding().background(.regularMaterial, in: .rect(cornerRadius: 12))
+                    }
+                }
+        }
+    }
 
-                ContentUnavailableView {
-                    Label("No Games Yet", systemImage: "square.stack")
-                } description: {
-                    Text("Import a Nintendo DS game (.nds) that you legally own. DualDS does not include any games.")
-                } actions: {
-                    Button {
-                        showingImporter = true
-                    } label: {
-                        Label("Import Game", systemImage: "square.and.arrow.down")
+    @ViewBuilder private var content: some View {
+        if games.isEmpty {
+            emptyState
+        } else {
+            let visible = model.visibleGames(games)
+            ScrollView {
+                if visible.isEmpty {
+                    ContentUnavailableView.search(text: model.searchText).padding(.top, 40)
+                }
+                LazyVGrid(columns: columns, spacing: 16) {
+                    ForEach(visible) { game in
+                        Button { selected = game } label: { GameCardView(game: game, artworkURL: model.artworkURL(game)) }
+                            .buttonStyle(.plain)
+                            .accessibilityIdentifier("library.game.\(game.gameCode)")
+                            .contextMenu {
+                                Button("Details", systemImage: "info.circle") { selected = game }
+                                Button("Delete", systemImage: "trash", role: .destructive) { pendingDelete = game }
+                            }
                     }
-                    .buttonStyle(.borderedProminent)
-                    .accessibilityIdentifier("library.import")
                 }
-                Spacer(minLength: 0)
-            }
-            .frame(maxWidth: .infinity)
-            .navigationTitle("Library")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showingSettings = true
-                    } label: {
-                        Label("Settings", systemImage: "gearshape")
-                    }
-                    .accessibilityIdentifier("library.settings")
-                }
-            }
-            .fileImporter(isPresented: $showingImporter, allowedContentTypes: [.ndsROM]) { result in
-                switch result {
-                case .success(let url):
-                    // Phase 3 implements validated, security-scoped import into app storage.
-                    notice = "Selected \(url.lastPathComponent). Importing games is not implemented yet."
-                case .failure(let error):
-                    notice = error.localizedDescription
-                }
-            }
-            .alert("Import", isPresented: Binding(get: { notice != nil }, set: { if !$0 { notice = nil } })) {
-                Button("OK", role: .cancel) {}
-            } message: {
-                Text(notice ?? "")
-            }
-            .sheet(isPresented: $showingSettings) {
-                SettingsView()
+                .padding()
             }
         }
+    }
+
+    private var emptyState: some View {
+        VStack(spacing: 32) {
+            BrandHeader().padding(.top, 24)
+            ContentUnavailableView {
+                Label("No Games Yet", systemImage: "square.stack")
+            } description: {
+                Text("Import a Nintendo DS game (.nds) that you legally own. DualDS does not include any games.")
+            } actions: {
+                Button { showingImporter = true } label: { Label("Import Game", systemImage: "square.and.arrow.down") }
+                    .buttonStyle(.borderedProminent)
+                    .accessibilityIdentifier("library.import")
+            }
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    @ToolbarContentBuilder private var toolbar: some ToolbarContent {
+        ToolbarItem(placement: .topBarLeading) {
+            Menu {
+                Picker("Sort", selection: $model.sort) {
+                    ForEach(LibrarySort.allCases) { Text($0.rawValue).tag($0) }
+                }
+            } label: { Label("Sort", systemImage: "arrow.up.arrow.down") }
+            .accessibilityIdentifier("library.sort")
+        }
+        ToolbarItem(placement: .topBarTrailing) {
+            Button { showingImporter = true } label: { Label("Import", systemImage: "plus") }
+                .accessibilityIdentifier("library.toolbarImport")
+        }
+        ToolbarItem(placement: .topBarTrailing) {
+            Button { showingSettings = true } label: { Label("Settings", systemImage: "gearshape") }
+                .accessibilityIdentifier("library.settings")
+        }
+    }
+
+    private func delete(_ game: Game) {
+        do {
+            if selected?.id == game.id { selected = nil }
+            try model.delete(game, context: context)
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+        pendingDelete = nil
+    }
+
+    private func present<T>(_ binding: Binding<T?>) -> Binding<Bool> {
+        Binding(get: { binding.wrappedValue != nil }, set: { if !$0 { binding.wrappedValue = nil } })
     }
 }
 
@@ -95,8 +164,4 @@ struct DualScreenGlyph: View {
             }
         }
     }
-}
-
-#Preview {
-    GameLibraryView()
 }

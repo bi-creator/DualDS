@@ -11,6 +11,7 @@ final class FirstLaunchUITests: XCTestCase {
     @MainActor
     func testLibraryShowsBrandingImportAndSettings() {
         let app = XCUIApplication()
+        app.launchEnvironment["DUALDS_UITEST_FRESH"] = "1"
         app.launch()
 
         XCTAssertTrue(app.staticTexts["brand.title"].waitForExistence(timeout: 5))
@@ -23,6 +24,7 @@ final class FirstLaunchUITests: XCTestCase {
     @MainActor
     func testSettingsOpensAboutWithLicenses() {
         let app = XCUIApplication()
+        app.launchEnvironment["DUALDS_UITEST_FRESH"] = "1"
         app.launch()
 
         app.buttons["library.settings"].tap()

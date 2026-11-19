@@ -53,6 +53,13 @@ sim_run_impl() {
   ls -la "$LOGDIR"/sim-screenshot*.png
 }
 
+# Signed Release build for a generic iOS device: proves device compilation, linking and signing
+# without hardware attached. Uses DEVELOPMENT_TEAM from Config/Signing.local.xcconfig.
+device_build() {
+  run_logged device-build xcodebuild -project DualDS.xcodeproj -scheme DualDS -configuration Release \
+    -destination 'generic/platform=iOS' -derivedDataPath "$DERIVED" -allowProvisioningUpdates build
+}
+
 sim_info_impl() {
   xcrun simctl list runtimes
   xcrun simctl list devicetypes
@@ -81,8 +88,9 @@ case "$STEP" in
   sim-test) sim_test ;;
   sim-run) sim_run ;;
   sim-info) sim_info ;;
+  device-build) device_build ;;
   core) core ;;
   all) phase1; core ;;
-  *) echo "usage: $0 [phase1|core|sim-build|sim-test|sim-run|all]" >&2; exit 2 ;;
+  *) echo "usage: $0 [phase1|core|sim-build|sim-test|sim-run|sim-info|device-build|all]" >&2; exit 2 ;;
 esac
 echo "All requested steps passed."
