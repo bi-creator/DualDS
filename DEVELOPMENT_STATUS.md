@@ -119,6 +119,10 @@ Created: `project.yml` (XcodeGen), `Config/*.xcconfig`, `App/`, `Features/{Libra
 * Fully open flat on the inner display (no crease reported, hinge `fullyOpen`, portrait): the
   same layout, split at the middle.
 * Display settings → "iPhone Duo Fold Layout": Automatic / Always / Off.
+* Handheld shell themes (`Features/Emulator/ShellTheme.swift`, original designs): Lilac
+  (default), Blush, Silver and Midnight. Shell body, screen bezels, a hinge band at the crease,
+  speaker grilles, a one-piece cross D-pad and themed buttons. The Metal view is transparent
+  outside the screens so the shell shows through.
 * `Rendering/DuoClamshellLayout.swift` (pure geometry; 6 unit tests) and
   `Features/Emulator/DuoSupport.swift`.
 * UI test `testFoldedDuoShowsTopScreenAboveFoldAndControlsBelow` (DEBUG fold at mid-window): top

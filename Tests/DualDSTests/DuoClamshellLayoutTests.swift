@@ -21,7 +21,7 @@ final class DuoClamshellLayoutTests: XCTestCase {
         let c = DuoClamshellLayout.make(bounds: bounds, fold: fold, scale: 3)
         XCTAssertEqual(c.topScreen.width / c.topScreen.height, 4.0 / 3.0, accuracy: 0.02)
         XCTAssertEqual(c.bottomScreen.width / c.bottomScreen.height, 4.0 / 3.0, accuracy: 0.02)
-        XCTAssertGreaterThan(c.topScreen.width, bounds.width * 0.8, "top screen uses most of the upper half")
+        XCTAssertGreaterThan(c.topScreen.width, bounds.width * 0.75, "top screen uses most of the upper half")
     }
 
     func testControlsFlankTheTouchScreenWithoutOverlap() {

@@ -38,10 +38,13 @@ final class DSMetalView: MTKView {
         super.init(frame: .zero, device: device)
         colorPixelFormat = .bgra8Unorm
         framebufferOnly = true
-        clearColor = MTLClearColorMake(0, 0, 0, 1)
+        // Transparent outside the two screens, so the shell, bezels and hinge band behind show through.
+        clearColor = MTLClearColorMake(0, 0, 0, 0)
+        isOpaque = false
+        layer.isOpaque = false
         preferredFramesPerSecond = 60
         isMultipleTouchEnabled = false
-        backgroundColor = .black
+        backgroundColor = .clear
 
         for (element, id, label) in [(topElement, "emulator.topScreen", "Top screen"),
                                      (bottomElement, "emulator.bottomScreen", "Touch screen")] {

@@ -71,10 +71,11 @@ struct HingeObserver: ViewModifier {
 
 /// Decorative speaker grille, as on the DS shell.
 struct SpeakerGrille: View {
+    @Environment(\.shellPalette) private var palette
     var body: some View {
         Grid(horizontalSpacing: 6, verticalSpacing: 6) {
             ForEach(0..<3, id: \.self) { _ in
-                GridRow { ForEach(0..<3, id: \.self) { _ in Circle().fill(.white.opacity(0.18)).frame(width: 5, height: 5) } }
+                GridRow { ForEach(0..<3, id: \.self) { _ in Circle().fill(palette.shellEdge).frame(width: 5, height: 5) } }
             }
         }
         .accessibilityHidden(true)

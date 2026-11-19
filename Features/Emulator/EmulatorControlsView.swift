@@ -13,15 +13,17 @@ struct ControlButton: View {
     let onChange: (DSButton, Bool) -> Void
 
     @State private var pressed = false
+    @Environment(\.shellPalette) private var palette
     private let haptic = UIImpactFeedbackGenerator(style: .light)
 
     var body: some View {
         Text(title)
             .font(.system(size: min(size.width, size.height) * 0.36, weight: .semibold, design: .rounded))
             .frame(width: size.width, height: size.height)
-            .background(shape.fill(.white.opacity(pressed ? 0.45 : 0.18)))
-            .overlay(shape.stroke(.white.opacity(0.35), lineWidth: 1))
-            .foregroundStyle(.white)
+            .background(shape.fill(pressed ? palette.buttonPressed : palette.button)
+                .shadow(color: .black.opacity(pressed ? 0 : 0.22), radius: pressed ? 0 : 2, y: pressed ? 0 : 1.5))
+            .overlay(shape.stroke(palette.label.opacity(0.18), lineWidth: 1))
+            .foregroundStyle(palette.label)
             .contentShape(shape)
             .gesture(
                 DragGesture(minimumDistance: 0)
@@ -44,23 +46,26 @@ struct ControlButton: View {
 
 struct DPadView: View {
     let onChange: (DSButton, Bool) -> Void
-    private let s = CGSize(width: 48, height: 48)
+    @Environment(\.shellPalette) private var palette
+    private let s = CGSize(width: 46, height: 46)
 
     var body: some View {
-        Grid(horizontalSpacing: 2, verticalSpacing: 2) {
+        let arm = AnyShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+        Grid(horizontalSpacing: 0, verticalSpacing: 0) {
             GridRow {
                 Color.clear.frame(width: s.width, height: s.height)
-                ControlButton(title: "▲", button: .up, size: s, shape: AnyShape(RoundedRectangle(cornerRadius: 8)), onChange: onChange)
+                ControlButton(title: "▲", button: .up, size: s, shape: arm, onChange: onChange)
                 Color.clear.frame(width: s.width, height: s.height)
             }
             GridRow {
-                ControlButton(title: "◀", button: .left, size: s, shape: AnyShape(RoundedRectangle(cornerRadius: 8)), onChange: onChange)
-                Color.clear.frame(width: s.width, height: s.height)
-                ControlButton(title: "▶", button: .right, size: s, shape: AnyShape(RoundedRectangle(cornerRadius: 8)), onChange: onChange)
+                ControlButton(title: "◀", button: .left, size: s, shape: arm, onChange: onChange)
+                Rectangle().fill(palette.button).frame(width: s.width, height: s.height)
+                    .overlay(Circle().fill(palette.label.opacity(0.12)).padding(14))
+                ControlButton(title: "▶", button: .right, size: s, shape: arm, onChange: onChange)
             }
             GridRow {
                 Color.clear.frame(width: s.width, height: s.height)
-                ControlButton(title: "▼", button: .down, size: s, shape: AnyShape(RoundedRectangle(cornerRadius: 8)), onChange: onChange)
+                ControlButton(title: "▼", button: .down, size: s, shape: arm, onChange: onChange)
                 Color.clear.frame(width: s.width, height: s.height)
             }
         }

@@ -11,6 +11,7 @@
 		0D5DC486F3AB811D3F85B65D /* EmulatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81C8799AE240CCB7DD19A48F /* EmulatorView.swift */; };
 		0F5132E9AC62708838E5E680 /* GameLibraryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58A04C849D3E5769A0F2F359 /* GameLibraryTests.swift */; };
 		15487425284FA7A6BD2B1FD5 /* GameCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 093B876A7C7445A8F6F64320 /* GameCardView.swift */; };
+		19F044DD05DE2BD6F02A1EE3 /* ShellTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45139DC66F37D3D8F1107E1 /* ShellTheme.swift */; };
 		1BF9D1A75D33F29A7AA4892E /* EmulatorUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5B794014FAD79D4E78C4767 /* EmulatorUITests.swift */; };
 		275E3D8EB46B0D2798954288 /* LibraryUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B222EEF3635652F56E77EC60 /* LibraryUITests.swift */; };
 		32D1CAC80ABF0C2ECF338965 /* AppConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F42AD7EFE574C666C43DAC /* AppConfiguration.swift */; };
@@ -106,6 +107,7 @@
 		CCF2A6D2202026E99D365859 /* DuoClamshellLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuoClamshellLayout.swift; sourceTree = "<group>"; };
 		CEF330B2047EB4B957352A7B /* AppConfigurationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfigurationTests.swift; sourceTree = "<group>"; };
 		D0F934A40D10D73400A2FF1C /* DualDSCore.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = DualDSCore.xcframework; path = Build/DualDSCore.xcframework; sourceTree = "<group>"; };
+		D45139DC66F37D3D8F1107E1 /* ShellTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellTheme.swift; sourceTree = "<group>"; };
 		DD996E82F350B218D288FA8F /* DSCoreBridge.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = DSCoreBridge.mm; sourceTree = "<group>"; };
 		DE2807EA4625A2C722F3232C /* MetalRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalRenderer.swift; sourceTree = "<group>"; };
 		DE29413637F7AC78235AE7E6 /* DualDSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DualDSApp.swift; sourceTree = "<group>"; };
@@ -205,6 +207,7 @@
 				3308D056BB2DC3DB1F1C95A3 /* EmulatorControlsView.swift */,
 				81C8799AE240CCB7DD19A48F /* EmulatorView.swift */,
 				1028887782B3478A3CB04CF5 /* EmulatorViewModel.swift */,
+				D45139DC66F37D3D8F1107E1 /* ShellTheme.swift */,
 			);
 			path = Emulator;
 			sourceTree = "<group>";
@@ -512,6 +515,7 @@
 				B163A49A80C29FDF9D4DE2FD /* ROMHeader.swift in Sources */,
 				BBCA4EF7B01D2949FF0ECEAD /* SettingsView.swift in Sources */,
 				4E3A738956D277B112BE3D3E /* ShaderLibrary.swift in Sources */,
+				19F044DD05DE2BD6F02A1EE3 /* ShellTheme.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

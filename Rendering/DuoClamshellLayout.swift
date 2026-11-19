@@ -31,6 +31,7 @@ struct DuoClamshellLayout: Equatable, Sendable {
     ///   - scale: pixels per point, for pixel alignment.
     static func make(bounds: CGRect, fold: CGRect, scale: CGFloat) -> DuoClamshellLayout {
         let pad: CGFloat = 10
+        let hingeClearance: CGFloat = 22   // keeps screen bezels off the hinge band
         let upper = CGRect(x: bounds.minX, y: bounds.minY,
                            width: bounds.width, height: max(0, fold.minY - bounds.minY))
         let lower = CGRect(x: bounds.minX, y: min(bounds.maxY, fold.maxY),
@@ -38,12 +39,12 @@ struct DuoClamshellLayout: Equatable, Sendable {
 
         let toolbar = CGRect(x: upper.minX + pad, y: upper.minY, width: max(0, upper.width - 2 * pad), height: toolbarHeight)
         let topSlot = CGRect(x: upper.minX + pad, y: upper.minY + toolbarHeight,
-                             width: max(0, upper.width - 2 * pad), height: max(0, upper.height - toolbarHeight - pad))
+                             width: max(0, upper.width - 2 * pad), height: max(0, upper.height - toolbarHeight - hingeClearance))
 
         let column = min(baseColumnWidth * 1.2, max(0, lower.width * 0.27))
-        let screenSlot = CGRect(x: lower.minX + column, y: lower.minY + pad,
+        let screenSlot = CGRect(x: lower.minX + column, y: lower.minY + hingeClearance,
                                 width: max(0, lower.width - 2 * column),
-                                height: max(0, lower.height - 2 * pad))
+                                height: max(0, lower.height - hingeClearance - pad))
         return DuoClamshellLayout(
             upperArea: upper, lowerArea: lower, toolbar: toolbar,
             topScreen: fit(in: topSlot, scale: scale),

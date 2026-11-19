@@ -20,6 +20,7 @@ struct EmulatorView: View {
     @AppStorage("controls.visible") private var controlsVisible = true
     @AppStorage("audio.volume") private var volume = 1.0
     @AppStorage("audio.muted") private var muted = false
+    @AppStorage("display.shellTheme") private var shellTheme = ShellTheme.lilac
     @AppStorage("display.duoLayout") private var duoMode = DuoLayoutMode.automatic
     @State private var hinge: HingeState = .unavailable
     @State private var hingeAngle = 0.0
@@ -36,7 +37,7 @@ struct EmulatorView: View {
         GeometryReader { geo in
             let landscape = geo.size.width > geo.size.height
             ZStack {
-                Color.black.ignoresSafeArea()
+                shellTheme.palette.shell.ignoresSafeArea()
                 if let fold = DuoPosture.fold(in: geo, mode: duoMode, hinge: hinge) {
                     clamshellBody(DuoClamshellLayout.make(bounds: CGRect(origin: .zero, size: geo.size), fold: fold,
                                                           scale: displayScale))
@@ -49,6 +50,7 @@ struct EmulatorView: View {
             }
         }
         .modifier(HingeObserver(state: $hinge, angle: $hingeAngle))
+        .environment(\.shellPalette, shellTheme.palette)
         .statusBarHidden()
         .persistentSystemOverlays(.hidden)
         .task {
@@ -89,6 +91,12 @@ struct EmulatorView: View {
     /// iPhone Duo folded like a laptop: top screen above the fold; touch screen and controls below.
     private func clamshellBody(_ c: DuoClamshellLayout) -> some View {
         ZStack(alignment: .topLeading) {
+            // Hinge band across the crease.
+            Rectangle().fill(shellTheme.palette.shellEdge)
+                .frame(width: c.upperArea.width + 400, height: max(10, c.lowerArea.minY - c.upperArea.maxY + 10))
+                .position(x: c.upperArea.midX, y: (c.upperArea.maxY + c.lowerArea.minY) / 2)
+            ScreenBezel(rect: c.topScreen)
+            ScreenBezel(rect: c.bottomScreen)
             DSScreensView(core: model.core, layout: layout,
                           explicitFrames: .init(top: c.topScreen, bottom: c.bottomScreen), filter: filter) { x, y, touching in
                 model.touch(x: x, y: y, touching: touching)
@@ -170,7 +178,7 @@ struct EmulatorView: View {
             TimelineView(.periodic(from: .now, by: 0.5)) { _ in
                 Text(model.phase == .running ? String(format: "%.0f fps", model.core.measuredFPS) : "")
                     .font(.caption.monospacedDigit())
-                    .foregroundStyle(.white.opacity(0.6))
+                    .foregroundStyle(shellTheme.palette.chrome.opacity(0.6))
                     .accessibilityIdentifier("emulator.fps")
             }
             Menu {
@@ -182,7 +190,7 @@ struct EmulatorView: View {
             .accessibilityIdentifier("emulator.menu")
         }
         .font(.title3)
-        .foregroundStyle(.white)
+        .foregroundStyle(shellTheme.palette.chrome)
         .frame(height: 40)
     }
 
@@ -220,6 +228,7 @@ struct EmulatorView: View {
     private var displaySettings: some View {
         NavigationStack {
             Form {
+                Picker("Theme", selection: $shellTheme) { ForEach(ShellTheme.allCases) { Text($0.rawValue).tag($0) } }
                 Picker("Arrangement", selection: $arrangement) { ForEach(DSScreenLayout.Arrangement.allCases) { Text($0.rawValue).tag($0) } }
                 Picker("Scaling", selection: $scaling) { ForEach(DSScreenLayout.Scaling.allCases) { Text($0.rawValue).tag($0) } }
                 Picker("Filter", selection: $filter) { ForEach(ScreenFilter.allCases) { Text($0.rawValue).tag($0) } }
