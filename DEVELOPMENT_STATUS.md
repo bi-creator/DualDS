@@ -10,7 +10,8 @@ Last updated: 2026-11-19
 | 3. Game import and library | ✅ Import, validation, dedupe, library, search/sort, details, artwork, delete; tests pass |
 | 4. Graphics and dual-screen rendering | ✅ Metal renderer, layouts, scaling, filters, emulator screen; end-to-end pixel test passes |
 | 5. Input | 🟡 On-screen controls + touch screen work; controller support, editing, sizing pending |
-| 6–15 | ⬜ Not started |
+| 10. iPhone Duo / foldable adaptation | 🟡 DS clamshell layout for the folded (~90°) Duo, plus flat-open split; verified with a simulated fold. Pending: real fold in Simulator/device |
+| 6–9, 11–15 | ⬜ Not started |
 
 ## Phase 0: investigation
 
@@ -104,6 +105,24 @@ Created: `project.yml` (XcodeGen), `Config/*.xcconfig`, `App/`, `Features/{Libra
 * CI now fails on any compiler warning in DualDS sources (`warnings-sim` step).
 * Tests: 32 unit (7 new layout/touch) and 4 UI. The new `EmulatorUITests` imports the test ROM,
   presses Play and samples the live Metal-rendered screens (top red, bottom blue). **All pass.**
+
+## Phase 10 (started early, owner priority: iPhone Duo)
+
+* **DS clamshell layout**: with the Duo folded like a laptop, the DS top screen fills the upper
+  half; below the crease sit the touch screen (centre), D-pad (left), ABXY (right), L/R (top
+  corners) and Start/Select (bottom right).
+* Fold detection uses Apple's iOS 27.1 APIs: `GeometryProxy.reservedRegions(kind: .division)`
+  for the crease frame and `onHingeChange` for hinge status and angle, behind `#available`.
+  Only a horizontal crease across the middle band is used. A vertical (book-posture) crease falls
+  back to the regular layouts.
+* Fully open flat on the inner display (no crease reported, hinge `fullyOpen`, portrait): the
+  same layout, split at the middle.
+* Display settings → "iPhone Duo Fold Layout": Automatic / Always / Off.
+* `Rendering/DuoClamshellLayout.swift` (pure geometry; 6 unit tests) and
+  `Features/Emulator/DuoSupport.swift`.
+* UI test `testFoldedDuoShowsTopScreenAboveFoldAndControlsBelow` (DEBUG fold at mid-window): top
+  screen above the fold, touch screen below, D-pad left and face buttons right of it, pixels
+  red/blue. **Passes.** Not yet exercised: a real crease from the Simulator's fold control or a device.
 
 ## Repository
 

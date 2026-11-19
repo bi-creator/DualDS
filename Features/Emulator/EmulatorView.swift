@@ -8,6 +8,7 @@ struct EmulatorView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.displayScale) private var displayScale
     @State private var model: EmulatorViewModel
     @State private var showingDisplaySettings = false
 
@@ -17,6 +18,9 @@ struct EmulatorView: View {
     @AppStorage("display.gap") private var gap = 0.0
     @AppStorage("display.swap") private var swapScreens = false
     @AppStorage("controls.visible") private var controlsVisible = true
+    @AppStorage("display.duoLayout") private var duoMode = DuoLayoutMode.automatic
+    @State private var hinge: HingeState = .unavailable
+    @State private var hingeAngle = 0.0
 
     init(game: Game, storage: GameStorage) {
         _model = State(initialValue: EmulatorViewModel(game: game, storage: storage))
@@ -31,10 +35,18 @@ struct EmulatorView: View {
             let landscape = geo.size.width > geo.size.height
             ZStack {
                 Color.black.ignoresSafeArea()
-                if landscape { landscapeBody } else { portraitBody }
+                if let fold = DuoPosture.fold(in: geo, mode: duoMode, hinge: hinge) {
+                    clamshellBody(DuoClamshellLayout.make(bounds: CGRect(origin: .zero, size: geo.size), fold: fold,
+                                                          scale: displayScale))
+                } else if landscape {
+                    landscapeBody
+                } else {
+                    portraitBody
+                }
                 overlay
             }
         }
+        .modifier(HingeObserver(state: $hinge, angle: $hingeAngle))
         .statusBarHidden()
         .persistentSystemOverlays(.hidden)
         .task { await model.start(context: context) }
@@ -65,6 +77,45 @@ struct EmulatorView: View {
                 .padding(.bottom, 8)
             }
         }
+    }
+
+    /// iPhone Duo folded like a laptop: top screen above the fold; touch screen and controls below.
+    private func clamshellBody(_ c: DuoClamshellLayout) -> some View {
+        ZStack(alignment: .topLeading) {
+            DSScreensView(core: model.core, layout: layout,
+                          explicitFrames: .init(top: c.topScreen, bottom: c.bottomScreen), filter: filter) { x, y, touching in
+                model.touch(x: x, y: y, touching: touching)
+            }
+            .accessibilityIdentifier("emulator.screens")
+
+            toolbar.frame(width: c.toolbar.width, height: c.toolbar.height)
+                .position(x: c.toolbar.midX, y: c.toolbar.midY)
+
+            if c.topScreen.minX - c.upperArea.minX > 44 {
+                SpeakerGrille().position(x: (c.upperArea.minX + c.topScreen.minX) / 2, y: c.topScreen.midY)
+                SpeakerGrille().position(x: (c.topScreen.maxX + c.upperArea.maxX) / 2, y: c.topScreen.midY)
+            }
+
+            if controlsVisible {
+                let s = c.controlScale
+                let shoulderY = c.lowerArea.minY + DuoClamshellLayout.shoulderRowHeight / 2 + 4
+                ShoulderButton(title: "L", button: .L, onChange: press).scaleEffect(s)
+                    .position(x: c.leftColumn.midX, y: shoulderY)
+                ShoulderButton(title: "R", button: .R, onChange: press).scaleEffect(s)
+                    .position(x: c.rightColumn.midX, y: shoulderY)
+                DPadView(onChange: press).scaleEffect(s)
+                    .position(x: c.leftColumn.midX, y: c.leftColumn.midY + 6)
+                FaceButtonsView(onChange: press).scaleEffect(s)
+                    .position(x: c.rightColumn.midX, y: c.rightColumn.midY - 4)
+                VStack(spacing: 10 * s) {
+                    SystemButton(title: "SELECT", button: .select, onChange: press)
+                    SystemButton(title: "START", button: .start, onChange: press)
+                }
+                .scaleEffect(s)
+                .position(x: c.rightColumn.midX, y: c.lowerArea.maxY - DuoClamshellLayout.systemRowHeight * s - 8)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
     private var landscapeBody: some View {
@@ -156,6 +207,7 @@ struct EmulatorView: View {
                 Picker("Arrangement", selection: $arrangement) { ForEach(DSScreenLayout.Arrangement.allCases) { Text($0.rawValue).tag($0) } }
                 Picker("Scaling", selection: $scaling) { ForEach(DSScreenLayout.Scaling.allCases) { Text($0.rawValue).tag($0) } }
                 Picker("Filter", selection: $filter) { ForEach(ScreenFilter.allCases) { Text($0.rawValue).tag($0) } }
+                Picker("iPhone Duo Fold Layout", selection: $duoMode) { ForEach(DuoLayoutMode.allCases) { Text($0.rawValue).tag($0) } }
                 Toggle("Touch Screen First", isOn: $swapScreens)
                 VStack(alignment: .leading) {
                     Text("Screen Gap: \(Int(gap)) pt")

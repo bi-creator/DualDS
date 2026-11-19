@@ -24,6 +24,47 @@ final class EmulatorUITests: XCTestCase {
     }
 
     @MainActor
+    func testFoldedDuoShowsTopScreenAboveFoldAndControlsBelow() throws {
+        let rom = try XCTUnwrap(Bundle(for: Self.self).path(forResource: "dualds-test", ofType: "nds"))
+        let app = XCUIApplication()
+        app.launchEnvironment["DUALDS_UITEST_FRESH"] = "1"
+        app.launchEnvironment["DUALDS_UITEST_IMPORT"] = rom
+        app.launchEnvironment["DUALDS_SIMULATE_FOLD"] = "1"   // DEBUG: fold at the middle of the window
+        app.launch()
+
+        let alert = app.alerts["Import"]
+        XCTAssertTrue(alert.waitForExistence(timeout: 10))
+        alert.buttons["OK"].tap()
+        app.buttons["library.game.DDST"].tap()
+        let play = app.buttons["detail.play"]
+        XCTAssertTrue(play.waitForExistence(timeout: 5))
+        play.tap()
+
+        let top = app.descendants(matching: .any)["emulator.topScreen"]
+        let bottom = app.descendants(matching: .any)["emulator.bottomScreen"]
+        XCTAssertTrue(top.waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts["emulator.fps"].waitForExistence(timeout: 10))
+        sleep(2)
+
+        let window = app.windows.firstMatch.frame
+        XCTAssertLessThan(top.frame.maxY, window.midY, "top screen above the fold")
+        XCTAssertGreaterThan(bottom.frame.minY, window.midY, "touch screen below the fold")
+        let dpad = app.buttons["control.◀"].frame, a = app.buttons["control.A"].frame
+        XCTAssertLessThan(dpad.maxX, bottom.frame.minX, "D-pad left of the touch screen")
+        XCTAssertGreaterThan(a.minX, bottom.frame.maxX, "face buttons right of the touch screen")
+        XCTAssertGreaterThan(dpad.minY, window.midY)
+
+        let t = try centreColour(of: top), b = try centreColour(of: bottom)
+        XCTAssertGreaterThan(t.r, 180, "top screen red: \(t)")
+        XCTAssertGreaterThan(b.b, 180, "bottom screen blue: \(b)")
+
+        if let dir = ProcessInfo.processInfo.environment["DUALDS_SCREENSHOT_DIR"], !dir.isEmpty {
+            try? app.screenshot().pngRepresentation.write(to: URL(fileURLWithPath: dir).appendingPathComponent("emulator-duo-folded.png"))
+        }
+        app.buttons["emulator.close"].tap()
+    }
+
+    @MainActor
     func testPlayingTheTestROMRendersBothScreens() throws {
         let rom = try XCTUnwrap(Bundle(for: Self.self).path(forResource: "dualds-test", ofType: "nds"))
         let app = XCUIApplication()

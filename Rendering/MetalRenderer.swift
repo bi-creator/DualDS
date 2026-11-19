@@ -18,6 +18,8 @@ enum ScreenFilter: String, CaseIterable, Identifiable, Sendable {
 final class DSMetalView: MTKView {
     var core: DSCore?
     var layout = DSScreenLayout() { didSet { if layout != oldValue { setNeedsLayout() } } }
+    /// When set (iPhone Duo clamshell layout), these frames are used instead of `layout`.
+    var explicitFrames: DSScreenLayout.Frames? { didSet { if explicitFrames != oldValue { setNeedsLayout() } } }
     var filter: ScreenFilter = .nearest
     /// Called with DS touch coordinates; `touching == false` on release.
     var onTouch: ((Int, Int, Bool) -> Void)?
@@ -57,7 +59,7 @@ final class DSMetalView: MTKView {
 
     override func layoutSubviews() {
         super.layoutSubviews()
-        frames = layout.frames(in: bounds, scale: contentScaleFactor)
+        frames = explicitFrames ?? layout.frames(in: bounds, scale: contentScaleFactor)
         topElement.accessibilityFrameInContainerSpace = frames.top
         bottomElement.accessibilityFrameInContainerSpace = frames.bottom
     }

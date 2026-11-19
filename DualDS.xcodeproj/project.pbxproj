@@ -23,17 +23,20 @@
 		545845EB9033762C0FBD665E /* EmulatorControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3308D056BB2DC3DB1F1C95A3 /* EmulatorControlsView.swift */; };
 		58E1A9598147929E575F2E71 /* dualds-test.nds in Resources */ = {isa = PBXBuildFile; fileRef = 8AE7DE88F8020FD2C44DFD73 /* dualds-test.nds */; };
 		60562158592A73584EF62DA2 /* Game.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D9003E5FDF0465A1F06D48B /* Game.swift */; };
+		61D9F0098952CBDDB58F81BF /* DuoClamshellLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9663A995276A26E6729671C5 /* DuoClamshellLayoutTests.swift */; };
 		641EC43A7924759F3A58BF14 /* GameStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B49F0AA7E2D141B0DDB066C1 /* GameStorage.swift */; };
 		67BFE86F9D7FE64244720A0C /* EmulatorViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1028887782B3478A3CB04CF5 /* EmulatorViewModel.swift */; };
 		6C7476E4ABE4F588E71A5575 /* DSScreensView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519959685C70FBEF75EBC7B4 /* DSScreensView.swift */; };
 		708DE2DF505CF62CC2BF2B17 /* dualds-test.nds in Resources */ = {isa = PBXBuildFile; fileRef = 8AE7DE88F8020FD2C44DFD73 /* dualds-test.nds */; };
 		753A74FC31449BB1989D2CC6 /* GameLibraryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 112B8042B2702FD9C91914ED /* GameLibraryViewModel.swift */; };
 		8CC5FD79C388022A36794F8D /* DualDSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE29413637F7AC78235AE7E6 /* DualDSApp.swift */; };
+		927C27421E835033F7EB5E47 /* DuoSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = C84BDD8A8FAB61E1216A8238 /* DuoSupport.swift */; };
 		9931F010EBFC9275B596D203 /* LICENSE-melonDS.txt in Resources */ = {isa = PBXBuildFile; fileRef = 5B40FED767E00BF7419E8DE6 /* LICENSE-melonDS.txt */; };
 		A0A2EC9615E44178D08BBF15 /* LICENSE-DualDS.txt in Resources */ = {isa = PBXBuildFile; fileRef = 6027223C5D17B3FF787CD2DE /* LICENSE-DualDS.txt */; };
 		B163A49A80C29FDF9D4DE2FD /* ROMHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A1D63A0D0197764103A0D40 /* ROMHeader.swift */; };
 		B31A912E496D918FDB0E2A6B /* DSCoreBridge.mm in Sources */ = {isa = PBXBuildFile; fileRef = DD996E82F350B218D288FA8F /* DSCoreBridge.mm */; };
 		BBCA4EF7B01D2949FF0ECEAD /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11121B5D69B5F2D48685CB17 /* SettingsView.swift */; };
+		BE5EE1ECCBD324AAA27B20C6 /* DuoClamshellLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCF2A6D2202026E99D365859 /* DuoClamshellLayout.swift */; };
 		C6F2CA1BDF94380E63080467 /* ROMHeaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16C6EE3EA12578887DED9A7F /* ROMHeaderTests.swift */; };
 		D57775ACB410CB734C9F2A5B /* MetalRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE2807EA4625A2C722F3232C /* MetalRenderer.swift */; };
 		E989AAC5E3C94F8D76BA60AA /* AppConfigurationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEF330B2047EB4B957352A7B /* AppConfigurationTests.swift */; };
@@ -87,6 +90,7 @@
 		8AE7DE88F8020FD2C44DFD73 /* dualds-test.nds */ = {isa = PBXFileReference; path = "dualds-test.nds"; sourceTree = "<group>"; };
 		93A18964107D105D695E0414 /* GameImportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameImportService.swift; sourceTree = "<group>"; };
 		9485AC81BBA2F9068BCD57A2 /* DualDSUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = DualDSUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		9663A995276A26E6729671C5 /* DuoClamshellLayoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuoClamshellLayoutTests.swift; sourceTree = "<group>"; };
 		9C9B347C68AE6764213D5ED2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		A5F42AD7EFE574C666C43DAC /* AppConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfiguration.swift; sourceTree = "<group>"; };
 		AD0FDFFFD03A480F7D5BC18F /* DSCoreBridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DSCoreBridge.h; sourceTree = "<group>"; };
@@ -94,6 +98,8 @@
 		B49F0AA7E2D141B0DDB066C1 /* GameStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameStorage.swift; sourceTree = "<group>"; };
 		BFCB7FA6903195B321CE7865 /* DualDS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = DualDS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C7AD25171F39622DBA5189E0 /* DualDS-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "DualDS-Bridging-Header.h"; sourceTree = "<group>"; };
+		C84BDD8A8FAB61E1216A8238 /* DuoSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuoSupport.swift; sourceTree = "<group>"; };
+		CCF2A6D2202026E99D365859 /* DuoClamshellLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuoClamshellLayout.swift; sourceTree = "<group>"; };
 		CEF330B2047EB4B957352A7B /* AppConfigurationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfigurationTests.swift; sourceTree = "<group>"; };
 		D0F934A40D10D73400A2FF1C /* DualDSCore.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = DualDSCore.xcframework; path = Build/DualDSCore.xcframework; sourceTree = "<group>"; };
 		DD996E82F350B218D288FA8F /* DSCoreBridge.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = DSCoreBridge.mm; sourceTree = "<group>"; };
@@ -171,6 +177,7 @@
 			children = (
 				CEF330B2047EB4B957352A7B /* AppConfigurationTests.swift */,
 				6ABE720993DE78C89DECB35B /* DSScreenLayoutTests.swift */,
+				9663A995276A26E6729671C5 /* DuoClamshellLayoutTests.swift */,
 				E38023C6E0EA1D9D5DCACBEC /* EmulatorBridgeTests.swift */,
 				58A04C849D3E5769A0F2F359 /* GameLibraryTests.swift */,
 				16C6EE3EA12578887DED9A7F /* ROMHeaderTests.swift */,
@@ -189,6 +196,7 @@
 		9D7D762A5FBBC5D2074F5CEB /* Emulator */ = {
 			isa = PBXGroup;
 			children = (
+				C84BDD8A8FAB61E1216A8238 /* DuoSupport.swift */,
 				3308D056BB2DC3DB1F1C95A3 /* EmulatorControlsView.swift */,
 				81C8799AE240CCB7DD19A48F /* EmulatorView.swift */,
 				1028887782B3478A3CB04CF5 /* EmulatorViewModel.swift */,
@@ -252,6 +260,7 @@
 			children = (
 				13AE95520E0178C295ACD40E /* DSScreenLayout.swift */,
 				519959685C70FBEF75EBC7B4 /* DSScreensView.swift */,
+				CCF2A6D2202026E99D365859 /* DuoClamshellLayout.swift */,
 				DE2807EA4625A2C722F3232C /* MetalRenderer.swift */,
 				FDC89111B86E0EEECDABBA2B /* ShaderLibrary.swift */,
 			);
@@ -480,6 +489,8 @@
 				3647871705827E6D0DAF4774 /* DSScreenLayout.swift in Sources */,
 				6C7476E4ABE4F588E71A5575 /* DSScreensView.swift in Sources */,
 				8CC5FD79C388022A36794F8D /* DualDSApp.swift in Sources */,
+				BE5EE1ECCBD324AAA27B20C6 /* DuoClamshellLayout.swift in Sources */,
+				927C27421E835033F7EB5E47 /* DuoSupport.swift in Sources */,
 				545845EB9033762C0FBD665E /* EmulatorControlsView.swift in Sources */,
 				0D5DC486F3AB811D3F85B65D /* EmulatorView.swift in Sources */,
 				67BFE86F9D7FE64244720A0C /* EmulatorViewModel.swift in Sources */,
@@ -503,6 +514,7 @@
 			files = (
 				E989AAC5E3C94F8D76BA60AA /* AppConfigurationTests.swift in Sources */,
 				4C76E4E66CD28E2F971BED83 /* DSScreenLayoutTests.swift in Sources */,
+				61D9F0098952CBDDB58F81BF /* DuoClamshellLayoutTests.swift in Sources */,
 				05EDC3E3CB06297AF23C524D /* EmulatorBridgeTests.swift in Sources */,
 				0F5132E9AC62708838E5E680 /* GameLibraryTests.swift in Sources */,
 				C6F2CA1BDF94380E63080467 /* ROMHeaderTests.swift in Sources */,
