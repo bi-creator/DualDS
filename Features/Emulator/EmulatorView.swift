@@ -18,6 +18,8 @@ struct EmulatorView: View {
     @AppStorage("display.gap") private var gap = 0.0
     @AppStorage("display.swap") private var swapScreens = false
     @AppStorage("controls.visible") private var controlsVisible = true
+    @AppStorage("audio.volume") private var volume = 1.0
+    @AppStorage("audio.muted") private var muted = false
     @AppStorage("display.duoLayout") private var duoMode = DuoLayoutMode.automatic
     @State private var hinge: HingeState = .unavailable
     @State private var hingeAngle = 0.0
@@ -49,7 +51,12 @@ struct EmulatorView: View {
         .modifier(HingeObserver(state: $hinge, angle: $hingeAngle))
         .statusBarHidden()
         .persistentSystemOverlays(.hidden)
-        .task { await model.start(context: context) }
+        .task {
+            model.setAudio(volume: volume, muted: muted)
+            await model.start(context: context)
+        }
+        .onChange(of: volume) { _, v in model.setAudio(volume: v, muted: muted) }
+        .onChange(of: muted) { _, m in model.setAudio(volume: volume, muted: m) }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { model.appBecameActive() } else { model.appBecameInactive() }
         }
@@ -170,6 +177,7 @@ struct EmulatorView: View {
                 Button("Reset Game", systemImage: "arrow.counterclockwise") { model.reset() }
                 Button("Display…", systemImage: "rectangle.split.1x2") { showingDisplaySettings = true }
                 Toggle("Show Controls", isOn: $controlsVisible)
+                Toggle("Mute Sound", isOn: $muted)
             } label: { Image(systemName: "ellipsis.circle") }
             .accessibilityIdentifier("emulator.menu")
         }
@@ -197,7 +205,15 @@ struct EmulatorView: View {
             Text("Paused").font(.headline).padding(10).background(.ultraThinMaterial, in: .capsule)
                 .foregroundStyle(.white).allowsHitTesting(false)
         case .running:
-            EmptyView()
+            if let audioError = model.audioError {
+                VStack {
+                    Spacer()
+                    Label(audioError, systemImage: "speaker.slash").font(.caption).padding(8)
+                        .background(.ultraThinMaterial, in: .capsule).foregroundStyle(.white)
+                }
+                .allowsHitTesting(false)
+                .accessibilityIdentifier("emulator.audioError")
+            }
         }
     }
 
@@ -207,6 +223,10 @@ struct EmulatorView: View {
                 Picker("Arrangement", selection: $arrangement) { ForEach(DSScreenLayout.Arrangement.allCases) { Text($0.rawValue).tag($0) } }
                 Picker("Scaling", selection: $scaling) { ForEach(DSScreenLayout.Scaling.allCases) { Text($0.rawValue).tag($0) } }
                 Picker("Filter", selection: $filter) { ForEach(ScreenFilter.allCases) { Text($0.rawValue).tag($0) } }
+                VStack(alignment: .leading) {
+                    Text("Volume: \(Int(volume * 100))%")
+                    Slider(value: $volume, in: 0...1)
+                }
                 Picker("iPhone Duo Fold Layout", selection: $duoMode) { ForEach(DuoLayoutMode.allCases) { Text($0.rawValue).tag($0) } }
                 Toggle("Touch Screen First", isOn: $swapScreens)
                 VStack(alignment: .leading) {

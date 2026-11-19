@@ -11,7 +11,8 @@ Last updated: 2026-11-19
 | 4. Graphics and dual-screen rendering | ✅ Metal renderer, layouts, scaling, filters, emulator screen; end-to-end pixel test passes |
 | 5. Input | 🟡 On-screen controls + touch screen work; controller support, editing, sizing pending |
 | 10. iPhone Duo / foldable adaptation | 🟡 DS clamshell layout for the folded (~90°) Duo, plus flat-open split; verified with a simulated fold. Pending: real fold in Simulator/device |
-| 6–9, 11–15 | ⬜ Not started |
+| 6. Audio | ✅ AVAudioEngine output, latency cap, interruptions and route changes, mute/volume; tests pass (Simulator) |
+| 7–9, 11–15 | ⬜ Not started |
 
 ## Phase 0: investigation
 
@@ -123,6 +124,25 @@ Created: `project.yml` (XcodeGen), `Config/*.xcconfig`, `App/`, `Features/{Libra
 * UI test `testFoldedDuoShowsTopScreenAboveFoldAndControlsBelow` (DEBUG fold at mid-window): top
   screen above the fold, touch screen below, D-pad left and face buttons right of it, pixels
   red/blue. **Passes.** Not yet exercised: a real crease from the Simulator's fold control or a device.
+
+## Phase 6: audio
+
+* `Rendering/AudioRenderer.swift`: `AVAudioSourceNode` render block (built `nonisolated`, runs on
+  the real-time thread) pulls the core's 48 kHz stereo s16 ring through a preallocated scratch
+  buffer and converts it to float. Buffered audio above 120 ms is discarded to cap latency;
+  underruns output silence. Stats are counted under an unfair lock.
+* Audio session `.playback` with a 5 ms preferred IO buffer. Restarts after interruptions (calls,
+  Siri), `AVAudioEngineConfigurationChange` (headphones, Bluetooth, route or sample-rate
+  changes) and media-services resets.
+* Audio pauses and resumes with the emulator (including on backgrounding) and stops on close.
+  Fast-forward is silent. Mute and volume are in the emulator menu and display settings, and are
+  persisted. If audio cannot start, the game keeps running and shows a "Sound is unavailable"
+  notice.
+* A/V sync: video and audio share the emulation clock, and the latency cap bounds drift. No time
+  stretching yet.
+* Tests: `AudioRendererTests` (latency cap and silence padding; live AVAudioEngine output: >60k
+  SPU frames in 2 s, <20% silence, nothing rendered while paused). **Both pass on the Simulator.**
+  Full suite: 40 unit + 5 UI.
 
 ## Repository
 

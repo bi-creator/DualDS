@@ -11,6 +11,9 @@ final class EmulatorViewModel {
     enum Phase: Equatable { case loading, running, paused, failed(String) }
 
     let core = DSCore()
+    let audio: AudioRenderer
+    /// Set if audio could not start; the game keeps running silently.
+    private(set) var audioError: String?
     let game: Game
     let storage: GameStorage
     private(set) var phase: Phase = .loading
@@ -22,6 +25,7 @@ final class EmulatorViewModel {
     init(game: Game, storage: GameStorage) {
         self.game = game
         self.storage = storage
+        self.audio = AudioRenderer(core: core)
     }
 
     func start(context: ModelContext) async {
@@ -42,6 +46,7 @@ final class EmulatorViewModel {
         core.onStopped = Self.stopHandler(for: self)
         game.lastPlayedAt = .now
         try? context.save()
+        do { try audio.start() } catch { audioError = "Sound is unavailable: \(error.localizedDescription)" }
         runningSince = .now
         phase = .running
     }
@@ -64,6 +69,11 @@ final class EmulatorViewModel {
         core.setFastForward(on)
     }
 
+    func setAudio(volume: Double, muted: Bool) {
+        audio.volume = Float(volume)
+        audio.isMuted = muted
+    }
+
     func setButton(_ button: DSButton, pressed: Bool) { core.setButton(button, pressed: pressed) }
     func touch(x: Int, y: Int, touching: Bool) { core.setTouch(x: x, y: y, touching: touching) }
 
@@ -71,18 +81,21 @@ final class EmulatorViewModel {
     func finish(context: ModelContext) {
         accumulatePlayTime()
         core.onStopped = nil
+        audio.stop()
         core.stop()
         try? context.save()
     }
 
     private func pauseCore() {
         core.pause()
+        audio.pause()
         accumulatePlayTime()
         phase = .paused
     }
 
     private func resumeCore() {
         core.resume()
+        audio.resume()
         runningSince = .now
         phase = .running
     }
@@ -101,6 +114,7 @@ final class EmulatorViewModel {
 
     private func coreStopped(_ reason: String) {
         accumulatePlayTime()
+        audio.pause()
         phase = .failed(reason)
     }
 

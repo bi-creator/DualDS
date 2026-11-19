@@ -5,7 +5,7 @@
 | In-app emulator screen | Core and bridge work in the app process (tested), but there is no emulator UI yet (Phase 4). |
 | Core LTO | Static core libraries are built without LTO (bitcode breaks `-create-xcframework`). Re-evaluate in Phase 11. |
 | Physical device | Not yet run on hardware. |
-| Audio | Not yet audible in the app (Phase 6); the core produces samples, which are currently discarded. |
+| Audio sync | Clock-paced with a 120 ms latency cap. Long sessions may occasionally drop or pad a few ms to stay in sync (no time-stretching yet). Untested on hardware. |
 | Controllers | Bluetooth controllers not yet supported (Phase 5). |
 | JIT | Compiled out. App Store apps cannot use JIT, so the interpreter's performance is the ceiling. |
 | BIOS / firmware | FreeBIOS + generated firmware only. Direct boot always; no firmware menu. Firmware settings (nickname, language) are not persisted yet. |
