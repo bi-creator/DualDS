@@ -13,6 +13,8 @@ struct GameLibraryView: View {
     @State private var showingSettings = false
     @State private var selected: Game?
     @State private var pendingDelete: Game?
+    @State private var pendingPlay: Game?
+    @State private var playing: Game?
     @State private var errorMessage: String?
 
     private let columns = [GridItem(.adaptive(minimum: 150, maximum: 220), spacing: 16)]
@@ -44,8 +46,14 @@ struct GameLibraryView: View {
                 } message: {
                     Text("This removes the game file DualDS copied, its save data and save states from this device.")
                 }
-                .sheet(item: $selected) { game in
-                    GameDetailView(game: game, model: model) { pendingDelete = game }
+                .sheet(item: $selected, onDismiss: {
+                    // Start the game only after the details sheet has fully gone away.
+                    if let game = pendingPlay { pendingPlay = nil; playing = game }
+                }) { game in
+                    GameDetailView(game: game, model: model, onPlay: { pendingPlay = game }, onDelete: { pendingDelete = game })
+                }
+                .fullScreenCover(item: $playing) { game in
+                    EmulatorView(game: game, storage: model.storage)
                 }
                 .sheet(isPresented: $showingSettings) { SettingsView() }
                 .overlay {
@@ -71,6 +79,7 @@ struct GameLibraryView: View {
                             .buttonStyle(.plain)
                             .accessibilityIdentifier("library.game.\(game.gameCode)")
                             .contextMenu {
+                                Button("Play", systemImage: "play.fill") { playing = game }
                                 Button("Details", systemImage: "info.circle") { selected = game }
                                 Button("Delete", systemImage: "trash", role: .destructive) { pendingDelete = game }
                             }

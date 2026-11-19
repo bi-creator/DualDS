@@ -8,7 +8,9 @@ Last updated: 2026-11-19
 | 1. Project foundation | ✅ Builds and passes all tests on the iOS Simulator (Xcode 27.2) |
 | 2. melonDS core integration | 🟡 Core + ObjC++ bridge built for iOS and tested in the Simulator; **physical-device run pending** (needs signing + an iPhone/iPad) |
 | 3. Game import and library | ✅ Import, validation, dedupe, library, search/sort, details, artwork, delete; tests pass |
-| 4–15 | ⬜ Not started |
+| 4. Graphics and dual-screen rendering | ✅ Metal renderer, layouts, scaling, filters, emulator screen; end-to-end pixel test passes |
+| 5. Input | 🟡 On-screen controls + touch screen work; controller support, editing, sizing pending |
+| 6–15 | ⬜ Not started |
 
 ## Phase 0: investigation
 
@@ -82,6 +84,27 @@ Created: `project.yml` (XcodeGen), `Config/*.xcconfig`, `App/`, `Features/{Libra
 * Not yet tracked: last played and play time are stored but only updated once games can be
   launched (Phase 4).
 
+## Phase 4: graphics and dual-screen rendering
+
+* `Rendering/MetalRenderer.swift` (`DSMetalView`): MTKView subclass. Each refresh, the core copies
+  the latest frame into a shared MTLBuffer (3-deep ring guarded by a semaphore; no per-frame
+  allocation), a GPU blit fills two private textures, and two draws go into per-screen viewports.
+  Nearest or linear sampling. Shared/buffer-backed textures were tried first and crashed in the
+  iOS Simulator (unsupported there), hence the blit.
+* Shaders compile at runtime (`ShaderLibrary.swift`), so no Metal Toolchain download is needed.
+* `Rendering/DSScreenLayout.swift`: vertical / side-by-side, aspect-fit / integer (pixel
+  perfect) / stretch, configurable gap, screen swap, pixel alignment, touch mapping.
+* `Features/Emulator`: emulator screen launched from the library's Play button (details sheet or
+  context menu). Portrait and landscape control layouts, pause/resume, fast-forward, reset, FPS,
+  display settings (persisted), auto-pause plus save flush when backgrounded, play time and last
+  played recorded.
+* Touch screen: single-touch tracking on the bottom-screen frame, clamped at the edges.
+* Concurrency: callbacks invoked off the main thread (Metal completion, core stop) are built in
+  `nonisolated` helpers so they never inherit main-actor isolation.
+* CI now fails on any compiler warning in DualDS sources (`warnings-sim` step).
+* Tests: 32 unit (7 new layout/touch) and 4 UI. The new `EmulatorUITests` imports the test ROM,
+  presses Play and samples the live Metal-rendered screens (top red, bottom blue). **All pass.**
+
 ## Outstanding issues
 
 See KNOWN_ISSUES.md. Owner decisions are listed in LICENSING_REPORT.md §6.
@@ -89,4 +112,5 @@ See KNOWN_ISSUES.md. Owner decisions are listed in LICENSING_REPORT.md §6.
 ## Next steps
 
 1. Physical-device test run (signing).
-2. Phase 4: Metal dual-screen renderer + emulator screen, so a game is visible in the app.
+2. Phase 5: input polish (Game Controller framework, remapping, layout editor, sizing, opacity).
+3. Phase 6: audio (AVAudioEngine).

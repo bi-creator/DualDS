@@ -16,14 +16,25 @@ sim_dest() {
   echo "$sim"
 }
 
+# Fails if the compiler warned about any DualDS source file (Xcode's own tool notices are ignored).
+no_source_warnings() {
+  local hits
+  hits="$(grep -E "^$ROOT/(App|Features|Models|Services|Rendering|EmulatorBridge|Tests)/.*: warning:" "$LOGDIR/$1.log" | sort -u || true)"
+  if [ -n "$hits" ]; then echo "$hits"; echo "error: compiler warnings in DualDS sources (see above)"; return 1; fi
+  echo "no compiler warnings in DualDS sources"
+}
+
 sim_build() {
   run_logged xcodegen xcodegen generate --spec project.yml
   run_logged app-build-sim xcodebuild -project DualDS.xcodeproj -scheme DualDS -configuration Debug \
-    -destination "id=$(sim_dest)" -derivedDataPath "$DERIVED" CODE_SIGNING_ALLOWED=NO build
+    -destination "id=$(sim_dest)" -derivedDataPath "$DERIVED" CODE_SIGNING_ALLOWED=NO clean build
+  run_logged warnings-sim no_source_warnings app-build-sim
 }
 
 sim_test() {
+  run_logged xcodegen xcodegen generate --spec project.yml   # pick up new source files
   rm -rf "$ROOT/Build/logs/app-test-sim.xcresult"
+  TEST_RUNNER_DUALDS_SCREENSHOT_DIR="$LOGDIR" \
   run_logged app-test-sim xcodebuild -project DualDS.xcodeproj -scheme DualDS -configuration Debug \
     -destination "id=$(sim_dest)" -derivedDataPath "$DERIVED" -resultBundlePath "$ROOT/Build/logs/app-test-sim.xcresult" \
     CODE_SIGNING_ALLOWED=NO test

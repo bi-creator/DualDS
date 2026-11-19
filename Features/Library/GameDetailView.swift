@@ -2,12 +2,14 @@
 // Copyright (C) 2026 DualDS contributors. GPL-3.0-or-later.
 
 import PhotosUI
+import SwiftData
 import SwiftUI
 import UIKit
 
 struct GameDetailView: View {
     let game: Game
     let model: GameLibraryViewModel
+    let onPlay: () -> Void
     let onDelete: () -> Void
 
     @Environment(\.modelContext) private var context
@@ -30,6 +32,18 @@ struct GameDetailView: View {
                             if let publisher = game.publisher { Text(publisher).font(.footnote).foregroundStyle(.secondary) }
                         }
                     }
+                }
+                Section {
+                    Button {
+                        dismiss()
+                        onPlay()
+                    } label: {
+                        Label("Play", systemImage: "play.fill").frame(maxWidth: .infinity).font(.headline)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets())
+                    .accessibilityIdentifier("detail.play")
                 }
                 Section("Details") {
                     LabeledContent("Game code", value: game.gameCode)

@@ -37,7 +37,8 @@ typedef NS_ENUM(NSInteger, DSRunState) {
     DSRunStateIdle, DSRunStateRunning, DSRunStatePaused, DSRunStateStopped,
 };
 
-NS_SWIFT_NAME(DSCore)
+/// Thread-safe per the contract at the top of this file, hence Sendable in Swift.
+NS_SWIFT_NAME(DSCore) NS_SWIFT_SENDABLE
 @interface DSCoreBridge : NSObject
 
 @property (class, nonatomic, readonly) NSString *melonDSVersion;
