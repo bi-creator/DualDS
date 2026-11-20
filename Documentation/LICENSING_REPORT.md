@@ -71,5 +71,5 @@ from building, modifying and redistributing it, including for free.
 
 1. ✅ Published as GPL-3.0 at https://github.com/bi-creator/DualDS (2026-11-19).
 2. Contact the melonDS team before public release? (Recommended.)
-3. Keep the name "DualDS" or choose a store name without "DS"? The code name can stay either way.
+3. ✅ Store name **FoldPlay** (2026-11-20); "DualDS" stays the project/code name.
 4. Business model: free, or paid with source published? (Both are GPL-compatible.)

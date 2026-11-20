@@ -5,7 +5,8 @@ import Foundation
 import UniformTypeIdentifiers
 
 enum AppConfiguration {
-    static let appName = "DualDS"
+    /// User-facing name (App Store and home screen). "DualDS" remains the project/code name.
+    static let appName = "FoldPlay"
 
     /// Upstream melonDS commit the bundled core is built from (EmulatorCore/melonDS submodule).
     /// Scripts/verify-licenses.sh checks that this matches the submodule.

@@ -180,6 +180,18 @@ Created: `project.yml` (XcodeGen), `Config/*.xcconfig`, `App/`, `Features/{Libra
 * Tests: `SaveStateStoreTests` (5, real core and files) and `testSaveAndLoadAStateFromTheMenu`
   (slot save/load and Quick Save/Load end to end). **All pass.**
 
+## Release preparation (2026-11-20)
+
+* Store name **FoldPlay** (display name and in-app brand; DualDS stays the project name). Version 1.0.
+* App ID `com.bicreator.dualds` registered (team T429AK4VVK); App Store Connect app "FoldPlay"
+  created (Apple ID 6837318848, SKU dualds).
+* `Resources/PrivacyInfo.xcprivacy`: no tracking, no data collected; required-reason APIs declared.
+* `Scripts/ci.sh testflight`: unsigned Release archive, then App Store export signed with automatic
+  distribution signing and uploaded; timestamp build numbers; pushes the git tag
+  `v<version>-build.<n>` for GPL corresponding source. Checklist: Documentation/APP_STORE.md.
+* No games are bundled. Test games (homebrew the owner downloaded) are loaded into the Simulator
+  only, from `Build/import/` (git-ignored).
+
 ## Repository
 
 Published (GPL-3.0) at https://github.com/bi-creator/DualDS, branch `main`. About → Source Code links there.

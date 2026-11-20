@@ -286,7 +286,8 @@ struct PocketFace: View {
 /// Six-button arcade panel: Y X L on top, B A R below, offset like a classic cabinet.
 struct ArcadePanel: View {
     let onChange: (DSButton, Bool) -> Void
-    private let d: CGFloat = 52
+    // 3 × 48 + 2 × 2 spacing + 16 offset = 164, exactly the cluster width the layout reserves.
+    private let d: CGFloat = 48
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack(spacing: 2) { b("Y", .Y); b("X", .X); b("L", .L) }

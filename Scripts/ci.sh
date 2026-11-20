@@ -86,6 +86,47 @@ device_build() {
     -destination 'generic/platform=iOS' -derivedDataPath "$DERIVED" -allowProvisioningUpdates build
 }
 
+# Release archive -> upload to App Store Connect (TestFlight), then tag the source in git.
+# Needs: the team's Apple ID signed in under Xcode > Settings > Accounts, and an App Store Connect
+# app record for the bundle ID. Build numbers are timestamps so every upload is unique.
+testflight() {
+  local team bundle build version archive opts tag
+  team="$(sed -n 's/^DEVELOPMENT_TEAM *= *//p' "$ROOT/Config/Signing.local.xcconfig" | tr -d ' ')"
+  bundle="$(sed -n 's/^DUALDS_BUNDLE_ID *= *//p' "$ROOT/Config/Signing.local.xcconfig" | tr -d ' ')"
+  [ -n "$team" ] && [ -n "$bundle" ] || { echo "error: set DEVELOPMENT_TEAM and DUALDS_BUNDLE_ID in Config/Signing.local.xcconfig" >&2; return 1; }
+  [ -z "$(git status --porcelain)" ] || { echo "error: commit your changes first, so the uploaded build matches a public source tag" >&2; return 1; }
+  build="$(date +%Y%m%d%H%M)"
+  version="$(sed -n 's/^ *MARKETING_VERSION: *"\{0,1\}\([0-9.]*\)"\{0,1\}/\1/p' "$ROOT/project.yml" | head -1)"
+  archive="$ROOT/Build/DualDS-$build.xcarchive"
+  opts="$ROOT/Build/ExportOptions.plist"
+  cat > "$opts" <<PLIST
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+  <key>method</key><string>app-store-connect</string>
+  <key>destination</key><string>upload</string>
+  <key>teamID</key><string>$team</string>
+  <key>signingStyle</key><string>automatic</string>
+  <key>uploadSymbols</key><true/>
+  <key>manageAppVersionAndBuildNumber</key><false/>
+</dict></plist>
+PLIST
+  run_logged licenses "$ROOT/Scripts/verify-licenses.sh"
+  run_logged xcodegen xcodegen generate --spec project.yml
+  # Archive unsigned: development signing would need a registered test device. The export step
+  # signs the app for App Store distribution (automatic signing, distribution certificate).
+  run_logged archive xcodebuild -project DualDS.xcodeproj -scheme DualDS -configuration Release \
+    -destination 'generic/platform=iOS' -archivePath "$archive" \
+    CURRENT_PROJECT_VERSION="$build" CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" archive
+  run_logged upload xcodebuild -exportArchive -archivePath "$archive" -exportOptionsPlist "$opts" \
+    -exportPath "$ROOT/Build/export-$build" -allowProvisioningUpdates
+  # GPL-3.0 corresponding source: tag exactly what was uploaded and publish the tag.
+  tag="v$version-build.$build"
+  git tag -a "$tag" -m "TestFlight build $version ($build)"
+  run_logged push-tag git push origin "$tag"
+  echo "Uploaded DualDS $version ($build); source tag $tag"
+}
+
 sim_info_impl() {
   xcrun simctl list runtimes
   xcrun simctl list devicetypes
@@ -115,8 +156,9 @@ case "$STEP" in
   sim-run) sim_run ;;
   sim-info) sim_info ;;
   device-build) device_build ;;
+  testflight) testflight ;;
   core) core ;;
   all) phase1; core ;;
-  *) echo "usage: $0 [phase1|core|sim-build|sim-test|sim-run|sim-info|device-build|all]" >&2; exit 2 ;;
+  *) echo "usage: $0 [phase1|core|sim-build|sim-test|sim-run|sim-info|device-build|testflight|all]" >&2; exit 2 ;;
 esac
 echo "All requested steps passed."

@@ -25,7 +25,7 @@ struct AboutView: View {
                         .font(.caption.monospaced())
                         .foregroundStyle(.secondary)
                 }
-                Text("DualDS is not affiliated with or endorsed by Nintendo. Nintendo DS is a trademark of Nintendo. No games, BIOS or firmware are included.")
+                Text("FoldPlay (project name DualDS) is not affiliated with or endorsed by Nintendo. Nintendo DS is a trademark of Nintendo. No games, BIOS or firmware are included.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }

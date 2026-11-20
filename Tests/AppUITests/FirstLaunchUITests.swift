@@ -15,7 +15,7 @@ final class FirstLaunchUITests: XCTestCase {
         app.launch()
 
         XCTAssertTrue(app.staticTexts["brand.title"].waitForExistence(timeout: 5))
-        XCTAssertEqual(app.staticTexts["brand.title"].label, "DualDS")
+        XCTAssertEqual(app.staticTexts["brand.title"].label, "FoldPlay")
         XCTAssertTrue(app.staticTexts["No Games Yet"].exists)
         XCTAssertTrue(app.buttons["library.import"].exists)
         XCTAssertTrue(app.buttons["library.settings"].exists)
