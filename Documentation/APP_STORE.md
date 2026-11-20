@@ -25,8 +25,11 @@ physical iPhone/iPad with the TestFlight app; the Simulator can't install TestFl
 * Beta App Review / App Review: emulators are allowed (guideline 4.7); the app must not offer or
   link to game downloads (FoldPlay only imports files the user supplies). Notes for review: explain
   that no games are included, and how to test with a legally obtained homebrew file.
-* Privacy policy URL (required). Content: no data collected, games stay on device. Privacy
-  "nutrition label": Data Not Collected.
+* Privacy policy URL (required): `https://foldplay-privacy.vercel.app/privacy`, from the
+  [bi-creator/foldplay-privacy](https://github.com/bi-creator/foldplay-privacy) repo deployed on
+  Vercel. If Vercel assigns a different domain, update it in App Store Connect and in
+  `AppConfiguration.privacyPolicyURL` (shown in About, Privacy). Privacy "nutrition label": Data
+  Not Collected.
 * Age rating questionnaire. Category: Games or Utilities (decide).
 * Screenshots: 6.9" iPhone, plus iPhone Duo if App Store Connect offers a size for it. Use only
   homebrew or original content in screenshots, never commercial game imagery.

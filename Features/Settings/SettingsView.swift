@@ -15,7 +15,7 @@ struct SettingsView: View {
                     LabeledContent("3D renderer", value: "Software")
                 }
                 Section {
-                    NavigationLink("About DualDS") {
+                    NavigationLink("About \(AppConfiguration.appName)") {
                         AboutView()
                     }
                     .accessibilityIdentifier("settings.about")

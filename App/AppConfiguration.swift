@@ -17,6 +17,10 @@ enum AppConfiguration {
     /// Each release must also be tagged there (see Documentation/LICENSING_REPORT.md).
     static let sourceCodeURL: URL? = URL(string: "https://github.com/bi-creator/DualDS")
 
+    /// Privacy policy page (repo bi-creator/foldplay-privacy, deployed on Vercel). The same URL goes
+    /// into App Store Connect, App Privacy, Privacy Policy URL.
+    static let privacyPolicyURL: URL? = URL(string: "https://foldplay-privacy.vercel.app/privacy")
+
     static var marketingVersion: String {
         Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "?"
     }

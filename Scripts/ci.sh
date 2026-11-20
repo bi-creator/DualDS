@@ -144,6 +144,34 @@ phase1() {
   sim_run
 }
 
+# Commit and push the FoldPlay privacy site (sibling folder ../foldplay-privacy). Creates the public
+# GitHub repo bi-creator/foldplay-privacy on first run (needs the GitHub CLI, logged in).
+privacy_site() {
+  local site; site="$(cd "$ROOT/.." && pwd)/foldplay-privacy"
+  [ -f "$site/privacy.html" ] || { echo "missing $site/privacy.html" >&2; return 66; }
+  command -v gh >/dev/null || { echo "gh not installed: brew install gh && gh auth login" >&2; return 69; }
+  cd "$site"
+  [ -d .git ] || git init -b main
+  git add -A
+  if ! git diff --cached --quiet; then
+    git commit -m "FoldPlay app page and privacy policy (20 November 2026)" \
+      -m "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01XA6WVmMX3pDCBHDgGvdHVV"
+  fi
+  if git remote get-url origin >/dev/null 2>&1; then
+    git push -u origin main
+  elif gh repo view bi-creator/foldplay-privacy >/dev/null 2>&1; then
+    git remote add origin https://github.com/bi-creator/foldplay-privacy.git
+    git push -u origin main
+  else
+    gh repo create foldplay-privacy --public --source . --remote origin --push \
+      --description "FoldPlay app page and privacy policy (static site for Vercel)"
+  fi
+  git log --oneline -1
+  git remote -v
+  cd "$ROOT"
+}
+
 core() {
   "$ROOT/Scripts/test-core-host.sh"
   "$ROOT/Scripts/build-core.sh" all Release
@@ -157,8 +185,9 @@ case "$STEP" in
   sim-info) sim_info ;;
   device-build) device_build ;;
   testflight) testflight ;;
+  privacy-site) privacy_site ;;
   core) core ;;
   all) phase1; core ;;
-  *) echo "usage: $0 [phase1|core|sim-build|sim-test|sim-run|sim-info|device-build|testflight|all]" >&2; exit 2 ;;
+  *) echo "usage: $0 [phase1|core|sim-build|sim-test|sim-run|sim-info|device-build|testflight|privacy-site|all]" >&2; exit 2 ;;
 esac
 echo "All requested steps passed."

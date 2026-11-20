@@ -31,7 +31,14 @@ final class FirstLaunchUITests: XCTestCase {
         let about = app.buttons["settings.about"]
         XCTAssertTrue(about.waitForExistence(timeout: 5))
         about.tap()
+        XCTAssertTrue(app.navigationBars["About"].waitForExistence(timeout: 5))
+        let privacy = app.descendants(matching: .any)["about.privacyPolicy"].firstMatch
         let melonLicense = app.buttons["melonDS (GPL-3.0)"]
+        // The list only builds rows that are on screen, so scroll down to reach them.
+        for _ in 0..<6 where !(privacy.exists && melonLicense.isHittable) {
+            app.swipeUp()
+        }
+        XCTAssertTrue(privacy.exists, "About must link to the privacy policy")
         XCTAssertTrue(melonLicense.waitForExistence(timeout: 5))
         melonLicense.tap()
         XCTAssertTrue(app.staticTexts.containing(NSPredicate(format: "label CONTAINS %@", "GNU GENERAL PUBLIC LICENSE")).firstMatch

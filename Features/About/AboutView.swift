@@ -39,6 +39,16 @@ struct AboutView: View {
                 }
             }
 
+            Section("Privacy") {
+                Text("\(AppConfiguration.appName) collects no data. It has no account, ads or analytics and makes no internet connections; your games and saves stay on this device.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                if let url = AppConfiguration.privacyPolicyURL {
+                    Link("Privacy Policy", destination: url)
+                        .accessibilityIdentifier("about.privacyPolicy")
+                }
+            }
+
             Section("Licenses") {
                 ForEach(AppConfiguration.legalDocuments, id: \.resource) { doc in
                     NavigationLink(doc.title) {

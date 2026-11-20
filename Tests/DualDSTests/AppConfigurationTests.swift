@@ -30,4 +30,10 @@ final class AppConfigurationTests: XCTestCase {
         XCTAssertEqual(AppConfiguration.melonDSCommit.count, 40)
         XCTAssertTrue(AppConfiguration.melonDSCommit.allSatisfy(\.isHexDigit))
     }
+
+    func testPrivacyPolicyURLIsHTTPS() throws {
+        let url = try XCTUnwrap(AppConfiguration.privacyPolicyURL)
+        XCTAssertEqual(url.scheme, "https")
+        XCTAssertEqual(url.path, "/privacy")
+    }
 }
