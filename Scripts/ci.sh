@@ -42,6 +42,7 @@ sim_test() {
   for attempt in 1 2; do
     rm -rf "$ROOT/Build/logs/app-test-sim.xcresult"
     if TEST_RUNNER_DUALDS_SCREENSHOT_DIR="$LOGDIR" \
+       TEST_RUNNER_DUALDS_GAME_ROM="$ROOT/Build/import/back_alley_brawl.nds" \
        run_logged app-test-sim xcodebuild -project DualDS.xcodeproj -scheme DualDS -configuration Debug \
          -destination "id=$sim" -derivedDataPath "$DERIVED" -resultBundlePath "$ROOT/Build/logs/app-test-sim.xcresult" \
          CODE_SIGNING_ALLOWED=NO ${only[@]+"${only[@]}"} test; then
@@ -194,6 +195,33 @@ privacy_site() {
   cd "$ROOT"
 }
 
+# Build the FoldPlay Games ROMs (sibling repo ../FoldPlayGames) and stage them for sim-run.
+# Optional Build/requests/games-only.txt names one game.
+games() {
+  local repo; repo="$(cd "$ROOT/.." && pwd)/FoldPlayGames"
+  [ -x "$repo/Scripts/build.sh" ] || { echo "missing $repo/Scripts/build.sh" >&2; return 66; }
+  local only=""
+  [ -s "$ROOT/Build/requests/games-only.txt" ] && only="$(head -1 "$ROOT/Build/requests/games-only.txt")"
+  if [ "$only" = "__publish__" ]; then
+    # Commit the games repo and push it to a PRIVATE GitHub repo (created on first use).
+    ( cd "$repo"
+      [ -d .git ] || git init -b main
+      git add -A
+      if ! git diff --cached --quiet; then
+        if [ -f "$ROOT/Build/requests/games-commit.txt" ]; then git commit -F "$ROOT/Build/requests/games-commit.txt"
+        else git commit -m "Update FoldPlay Games"; fi
+      fi
+      if git remote get-url origin >/dev/null 2>&1; then git push -u origin main
+      else gh repo create FoldPlayGames --private --source . --remote origin --push \
+             --description "Original Nintendo DS games for FoldPlay (BlocksDS)"; fi
+      git log --oneline -1; git remote -v )
+    return
+  fi
+  run_logged games-build "$repo/Scripts/build.sh" $only
+  mkdir -p "$ROOT/Build/import"
+  cp "$repo"/Build/out/*.nds "$ROOT/Build/import/" 2>/dev/null || true
+}
+
 core() {
   "$ROOT/Scripts/test-core-host.sh"
   "$ROOT/Scripts/build-core.sh" all Release
@@ -208,6 +236,7 @@ case "$STEP" in
   device-build) device_build ;;
   testflight) testflight ;;
   privacy-site) privacy_site ;;
+  games) games ;;
   core) core ;;
   all) phase1; core ;;
   *) echo "usage: $0 [phase1|core|sim-build|sim-test|sim-run|sim-info|device-build|testflight|privacy-site|all]" >&2; exit 2 ;;

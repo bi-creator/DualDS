@@ -60,6 +60,7 @@
 		ED296B709583B6598535567A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0FF05971EEF451CC1F4FA888 /* Assets.xcassets */; };
 		EDECC1CC3CF09CC736245ADF /* GameLibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1622198AA820228932B384C6 /* GameLibraryView.swift */; };
 		F32250B509223B120D195888 /* AudioRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE589CFD3BEAD8AAD3E1D9C0 /* AudioRenderer.swift */; };
+		F7399C5DE11F9944F4136C9C /* GameROMUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BAF525E2A76F2FBABEFA912 /* GameROMUITests.swift */; };
 		F9FBAAEB2D35684F36FA941D /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D152084CFB38FD4593F95DB /* AboutView.swift */; };
 		FC10E086E6D2248B830226EC /* THIRD_PARTY_NOTICES.txt in Resources */ = {isa = PBXBuildFile; fileRef = 8A18EF268FE48574BD26C9E3 /* THIRD_PARTY_NOTICES.txt */; };
 /* End PBXBuildFile section */
@@ -104,6 +105,7 @@
 		598644B8E538D4C629F89004 /* SaveStateStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveStateStoreTests.swift; sourceTree = "<group>"; };
 		5A01986310B7ACE36AB16155 /* SaveState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveState.swift; sourceTree = "<group>"; };
 		5B40FED767E00BF7419E8DE6 /* LICENSE-melonDS.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "LICENSE-melonDS.txt"; sourceTree = "<group>"; };
+		5BAF525E2A76F2FBABEFA912 /* GameROMUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameROMUITests.swift; sourceTree = "<group>"; };
 		6027223C5D17B3FF787CD2DE /* LICENSE-DualDS.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "LICENSE-DualDS.txt"; sourceTree = "<group>"; };
 		62C880D421A184703F06DC51 /* ThemePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemePickerView.swift; sourceTree = "<group>"; };
 		6ABE720993DE78C89DECB35B /* DSScreenLayoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DSScreenLayoutTests.swift; sourceTree = "<group>"; };
@@ -196,6 +198,7 @@
 			children = (
 				F5B794014FAD79D4E78C4767 /* EmulatorUITests.swift */,
 				6F511BF002C5E7FF3BB3188C /* FirstLaunchUITests.swift */,
+				5BAF525E2A76F2FBABEFA912 /* GameROMUITests.swift */,
 				B222EEF3635652F56E77EC60 /* LibraryUITests.swift */,
 				4B97A8FA86E7AA76AEE6E6C2 /* ThemeUITests.swift */,
 			);
@@ -551,6 +554,7 @@
 			files = (
 				1BF9D1A75D33F29A7AA4892E /* EmulatorUITests.swift in Sources */,
 				4632F639E6545389556AC7E8 /* FirstLaunchUITests.swift in Sources */,
+				F7399C5DE11F9944F4136C9C /* GameROMUITests.swift in Sources */,
 				275E3D8EB46B0D2798954288 /* LibraryUITests.swift in Sources */,
 				57DAA84AD2A885B0028F4B4A /* ThemeUITests.swift in Sources */,
 			);

@@ -28,6 +28,7 @@ run_step() {
     device-build) Scripts/ci.sh device-build ;;
     testflight)  Scripts/ci.sh testflight ;;
     privacy-site) Scripts/ci.sh privacy-site ;;
+    games)       Scripts/ci.sh games ;;
     push)        git push -u origin HEAD ;;
     publish)     # Create the public GitHub repo (needs the GitHub CLI, logged in) and push main.
                  command -v gh >/dev/null || { echo "gh not installed: brew install gh && gh auth login"; return 69; }
@@ -46,7 +47,7 @@ run_step() {
   esac
 }
 
-echo "DualDS runner watching $REQ (allowed: bootstrap phase1 core host-tests core-ios licenses xcodegen sim-build sim-test sim-run sim-info device-build testflight privacy-site push publish crash-logs commit status)"
+echo "DualDS runner watching $REQ (allowed: bootstrap phase1 core host-tests core-ios licenses xcodegen sim-build sim-test sim-run sim-info device-build testflight privacy-site games push publish crash-logs commit status)"
 while true; do
   for f in "$REQ"/*.req; do
     [ -e "$f" ] || continue
