@@ -12,6 +12,9 @@ struct EmulatorView: View {
     @State private var model: EmulatorViewModel
     @State private var showingDisplaySettings = false
     @State private var showingSaveStates = false
+    @State private var showingSoundtrack = false
+    @State private var soundtrack = SoundtrackPlayer.shared
+    @AppStorage(AppTheme.storageKey) private var theme = AppTheme.classic
 
     @AppStorage("display.arrangement") private var arrangement = DSScreenLayout.Arrangement.vertical
     @AppStorage("display.scaling") private var scaling = DSScreenLayout.Scaling.aspectFit
@@ -31,7 +34,8 @@ struct EmulatorView: View {
         _model = State(initialValue: EmulatorViewModel(game: game, storage: storage))
     }
 
-    private var palette: ShellPalette { controllerStyle.palette(clamshellTheme: shellTheme) }
+    /// An era theme colours every controller style; Classic keeps each style's own look.
+    private var palette: ShellPalette { theme.palette ?? controllerStyle.palette(clamshellTheme: shellTheme) }
 
     private var layout: DSScreenLayout {
         DSScreenLayout(arrangement: arrangement, scaling: scaling, gap: gap, swapScreens: swapScreens)
@@ -69,6 +73,9 @@ struct EmulatorView: View {
         .sheet(isPresented: $showingDisplaySettings) { displaySettings }
         .sheet(isPresented: $showingSaveStates, onDismiss: { model.resumeAfterMenu() }) {
             SaveStatesView(model: model).onAppear { model.pauseForMenu() }
+        }
+        .sheet(isPresented: $showingSoundtrack, onDismiss: { model.resumeAfterMenu() }) {
+            SoundtrackView().onAppear { model.pauseForMenu() }
         }
         .alert("Save States", isPresented: Binding(get: { model.stateError != nil && !showingSaveStates },
                                                   set: { if !$0 { model.stateError = nil } })) {
@@ -202,6 +209,11 @@ struct EmulatorView: View {
             }
             .accessibilityIdentifier("emulator.fastForward")
             .accessibilityLabel("Fast forward")
+            Button { showingSoundtrack = true } label: {
+                Image(systemName: soundtrack.isPlaying ? "music.note.list" : "music.note")
+            }
+            .accessibilityIdentifier("emulator.soundtrack")
+            .accessibilityLabel("Soundtrack")
             Spacer()
             TimelineView(.periodic(from: .now, by: 0.5)) { _ in
                 Text(model.phase == .running ? String(format: "%.0f fps", model.core.measuredFPS) : "")
@@ -218,6 +230,17 @@ struct EmulatorView: View {
                 Button("Display…", systemImage: "rectangle.split.1x2") { showingDisplaySettings = true }
                 Picker("Controller Layout", selection: $controllerStyle) {
                     ForEach(ControllerStyle.allCases) { Text($0.rawValue).tag($0) }
+                }
+                Picker("Theme", selection: $theme) {
+                    ForEach(AppTheme.allCases) { Text($0.rawValue).tag($0) }
+                }
+                Divider()
+                Button("Soundtrack…", systemImage: "music.note") { showingSoundtrack = true }
+                if soundtrack.hasQueue {
+                    Button(soundtrack.isPlaying ? "Pause Music" : "Play Music", systemImage: soundtrack.isPlaying ? "pause" : "play") {
+                        Task { await soundtrack.togglePlayPause() }
+                    }
+                    Button("Next Song", systemImage: "forward") { Task { await soundtrack.next() } }
                 }
                 Toggle("Show Controls", isOn: $controlsVisible)
                 Toggle("Mute Sound", isOn: $muted)
@@ -271,7 +294,8 @@ struct EmulatorView: View {
                         }
                     }
                     .pickerStyle(.inline)
-                    if controllerStyle == .clamshell {
+                    Picker("Theme", selection: $theme) { ForEach(AppTheme.allCases) { Text($0.rawValue).tag($0) } }
+                    if controllerStyle == .clamshell && theme == .classic {
                         Picker("Colour", selection: $shellTheme) { ForEach(ShellTheme.allCases) { Text($0.rawValue).tag($0) } }
                     }
                 }
@@ -279,7 +303,7 @@ struct EmulatorView: View {
                 Picker("Scaling", selection: $scaling) { ForEach(DSScreenLayout.Scaling.allCases) { Text($0.rawValue).tag($0) } }
                 Picker("Filter", selection: $filter) { ForEach(ScreenFilter.allCases) { Text($0.rawValue).tag($0) } }
                 VStack(alignment: .leading) {
-                    Text("Volume: \(Int(volume * 100))%")
+                    Text("Game Volume: \(Int(volume * 100))%")
                     Slider(value: $volume, in: 0...1)
                 }
                 Picker("iPhone Duo Fold Layout", selection: $duoMode) { ForEach(DuoLayoutMode.allCases) { Text($0.rawValue).tag($0) } }

@@ -49,6 +49,7 @@ targets:
         UIApplicationSupportsIndirectInputEvents: true
         UIRequiresFullScreen: false
         ITSAppUsesNonExemptEncryption: false
+        NSAppleMusicUsageDescription: FoldPlay plays the songs you pick from Apple Music while you play games.
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
           - UIInterfaceOrientationLandscapeLeft

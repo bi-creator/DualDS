@@ -41,6 +41,8 @@
 	<true/>
 	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<true/>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>FoldPlay plays the songs you pick from Apple Music while you play games.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIFileSharingEnabled</key>

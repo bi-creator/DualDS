@@ -16,12 +16,14 @@ struct GameLibraryView: View {
     @State private var pendingPlay: Game?
     @State private var playing: Game?
     @State private var errorMessage: String?
+    @AppStorage(AppTheme.storageKey) private var theme = AppTheme.classic
 
     private let columns = [GridItem(.adaptive(minimum: 150, maximum: 220), spacing: 16)]
 
     var body: some View {
         NavigationStack {
             content
+                .background { ThemeBackdrop(theme: theme) }
                 .navigationTitle("Library")
                 .searchable(text: $model.searchText, prompt: "Search title or game code")
                 .toolbar { toolbar }
@@ -44,7 +46,7 @@ struct GameLibraryView: View {
                         if let game = pendingDelete { delete(game) }
                     }
                 } message: {
-                    Text("This removes the game file DualDS copied, its save data and save states from this device.")
+                    Text("This removes the game file \(AppConfiguration.appName) copied, its save data and save states from this device.")
                 }
                 .sheet(item: $selected, onDismiss: {
                     // Start the game only after the details sheet has fully gone away.
@@ -75,7 +77,14 @@ struct GameLibraryView: View {
                 }
                 LazyVGrid(columns: columns, spacing: 16) {
                     ForEach(visible) { game in
-                        Button { selected = game } label: { GameCardView(game: game, artworkURL: model.artworkURL(game)) }
+                        Button {
+                            InterfaceSound.shared.play(theme.sound)
+                            selected = game
+                        } label: {
+                            GameCardView(game: game, artworkURL: model.artworkURL(game))
+                                .padding(theme == .classic ? 0 : 10)
+                                .background(theme == .classic ? Color.clear : theme.cardFill, in: .rect(cornerRadius: 20, style: .continuous))
+                        }
                             .buttonStyle(.plain)
                             .accessibilityIdentifier("library.game.\(game.gameCode)")
                             .contextMenu {
@@ -96,7 +105,7 @@ struct GameLibraryView: View {
             ContentUnavailableView {
                 Label("No Games Yet", systemImage: "square.stack")
             } description: {
-                Text("Import a Nintendo DS game (.nds) that you legally own. DualDS does not include any games.")
+                Text("Import a Nintendo DS game (.nds) that you legally own. \(AppConfiguration.appName) does not include any games.")
             } actions: {
                 Button { showingImporter = true } label: { Label("Import Game", systemImage: "square.and.arrow.down") }
                     .buttonStyle(.borderedProminent)

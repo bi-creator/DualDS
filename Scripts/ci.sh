@@ -33,11 +33,30 @@ sim_build() {
 
 sim_test() {
   run_logged xcodegen xcodegen generate --spec project.yml   # pick up new source files
-  rm -rf "$ROOT/Build/logs/app-test-sim.xcresult"
-  TEST_RUNNER_DUALDS_SCREENSHOT_DIR="$LOGDIR" \
-  run_logged app-test-sim xcodebuild -project DualDS.xcodeproj -scheme DualDS -configuration Debug \
-    -destination "id=$(sim_dest)" -derivedDataPath "$DERIVED" -resultBundlePath "$ROOT/Build/logs/app-test-sim.xcresult" \
-    CODE_SIGNING_ALLOWED=NO test
+  local sim attempt only=()
+  sim="$(sim_dest)"
+  # Optional: Build/requests/test-only.txt holds one -only-testing target (e.g. DualDSUITests/ThemeUITests).
+  if [ -s "$ROOT/Build/requests/test-only.txt" ]; then only=("-only-testing:$(head -1 "$ROOT/Build/requests/test-only.txt")"); fi
+  xcrun simctl boot "$sim" 2>/dev/null || true
+  xcrun simctl bootstatus "$sim" -b >/dev/null 2>&1 || true
+  for attempt in 1 2; do
+    rm -rf "$ROOT/Build/logs/app-test-sim.xcresult"
+    if TEST_RUNNER_DUALDS_SCREENSHOT_DIR="$LOGDIR" \
+       run_logged app-test-sim xcodebuild -project DualDS.xcodeproj -scheme DualDS -configuration Debug \
+         -destination "id=$sim" -derivedDataPath "$DERIVED" -resultBundlePath "$ROOT/Build/logs/app-test-sim.xcresult" \
+         CODE_SIGNING_ALLOWED=NO ${only[@]+"${only[@]}"} test; then
+      break
+    fi
+    # The Simulator sometimes refuses the first launch after a build ("Busy", "No such process").
+    # That is not a test failure: reboot the simulator and run the tests once more.
+    if [ "$attempt" -eq 1 ] && grep -qE "failed preflight checks|No such process|failed to launch" "$LOGDIR/app-test-sim.log"; then
+      echo "Simulator launch hiccup: rebooting the simulator and retrying once."
+      xcrun simctl shutdown "$sim" || true
+      xcrun simctl boot "$sim" && xcrun simctl bootstatus "$sim" -b >/dev/null
+      continue
+    fi
+    return 1
+  done
   # Compiler warnings in app/test sources and runtime warnings reported against test files.
   run_logged warnings-test no_source_warnings app-test-sim
 }
@@ -154,9 +173,12 @@ privacy_site() {
   [ -d .git ] || git init -b main
   git add -A
   if ! git diff --cached --quiet; then
-    git commit -m "FoldPlay app page and privacy policy (20 November 2026)" \
-      -m "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
-Claude-Session: https://claude.ai/code/session_01XA6WVmMX3pDCBHDgGvdHVV"
+    # The message comes from Build/requests/privacy-message.txt when present.
+    if [ -f "$ROOT/Build/requests/privacy-message.txt" ]; then
+      git commit -F "$ROOT/Build/requests/privacy-message.txt"
+    else
+      git commit -m "Update FoldPlay app page and privacy policy"
+    fi
   fi
   if git remote get-url origin >/dev/null 2>&1; then
     git push -u origin main

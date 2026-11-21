@@ -117,7 +117,8 @@ final class EmulatorViewModel {
         core.onStopped = Self.stopHandler(for: self)
         game.lastPlayedAt = .now
         try? context.save()
-        do { try await audio.start() } catch { audioError = "Sound is unavailable: \(error.localizedDescription)" }
+        let mix = AudioSessionPolicy.mixWithOthers || SoundtrackPlayer.shared.hasQueue
+        do { try await audio.start(mixWithOthers: mix) } catch { audioError = "Sound is unavailable: \(error.localizedDescription)" }
         runningSince = .now
         phase = .running
     }

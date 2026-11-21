@@ -41,10 +41,16 @@ struct RootView: View {
     }
 
     @Environment(\.scenePhase) private var scenePhase
+    @AppStorage(AppTheme.storageKey) private var theme = AppTheme.classic
 
     var body: some View {
         GameLibraryView(model: model)
+            .tint(theme.accent)
+            .fontDesign(theme.fontDesign)
+            .preferredColorScheme(theme.colorScheme)
             .task {
+                // Library sounds never interrupt music from other apps (set off the main thread).
+                await Task.detached(priority: .utility) { try? AudioSessionPolicy.applyInterface() }.value
                 await importForUITestsIfRequested()
                 await importFromFilesFolder()
             }

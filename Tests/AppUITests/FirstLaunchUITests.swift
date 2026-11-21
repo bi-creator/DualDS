@@ -29,6 +29,8 @@ final class FirstLaunchUITests: XCTestCase {
 
         app.buttons["library.settings"].tap()
         let about = app.buttons["settings.about"]
+        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 5))
+        for _ in 0..<5 where !about.isHittable { app.swipeUp() }   // About sits below Appearance and Sound
         XCTAssertTrue(about.waitForExistence(timeout: 5))
         about.tap()
         XCTAssertTrue(app.navigationBars["About"].waitForExistence(timeout: 5))

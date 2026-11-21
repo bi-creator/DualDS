@@ -192,6 +192,25 @@ Created: `project.yml` (XcodeGen), `Config/*.xcconfig`, `App/`, `Features/{Libra
 * No games are bundled. Test games (homebrew the owner downloaded) are loaded into the Simulator
   only, from `Build/import/` (git-ignored).
 
+## Themes and music (owner request, 2026-11-21)
+
+* **10 era themes + Classic** (`Features/Themes`): Neon Maze (1980 arcade mazes), Vector Void (1981
+  vector shooters), Pixel Kingdom (1985 platformers), Dungeon Map (1986 dungeon quests), Block Rain
+  (1989 falling blocks), Pocket Green (1989 monochrome handhelds), Speed Zone (1991 16-bit speed),
+  Street Brawl (1991 arcade fighters), Polygon Rally (1997 early 3D racing), Fog Town (1999 survival
+  horror). Each sets accent, light/dark, font design, a procedural backdrop (drawn in code), the
+  controller colours for every controller style, and a synthesized tap sound. All original: no game
+  names, characters, logos, music or art. Picker in Settings → Theme, and in the game menu.
+  Contrast of button labels ≥ 3:1 is unit-tested; `ThemeUITests` screenshots every theme.
+* **Music while playing.** (A) `AudioSessionPolicy`: the library uses `.ambient`; games use
+  `.playback` with `.mixWithOthers` (default on, Settings → Keep Other Music Playing), so Spotify,
+  YouTube Music or Apple Music keep playing under the game. (B) `SoundtrackPlayer` +
+  `SoundtrackView`: MusicKit search, a saved song list, play/pause/next/shuffle, a one-tap starter
+  list of the owner's eight songs, subscription offer. Opened from the game toolbar (♪) and Settings.
+  YouTube playback was rejected: its API terms forbid audio-only or background play.
+* Not verifiable in the Simulator: MusicKit playback (needs a device, an Apple Music subscription and
+  the MusicKit App Service on the App ID).
+
 ## Repository
 
 Published (GPL-3.0) at https://github.com/bi-creator/DualDS, branch `main`. About → Source Code links there.

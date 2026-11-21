@@ -40,7 +40,7 @@ struct AboutView: View {
             }
 
             Section("Privacy") {
-                Text("\(AppConfiguration.appName) collects no data. It has no account, ads or analytics and makes no internet connections; your games and saves stay on this device.")
+                Text("\(AppConfiguration.appName) collects no data. It has no account, ads or analytics, and your games and saves stay on this device. If you use the Apple Music soundtrack, Apple Music searches and plays songs under your Apple Account.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                 if let url = AppConfiguration.privacyPolicyURL {

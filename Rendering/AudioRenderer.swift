@@ -83,12 +83,13 @@ final class AudioRenderer {
 
     /// Starts audio output. Throws if the audio session or engine cannot start; the emulator keeps
     /// running silently in that case (the caller reports it).
-    func start() async throws {
+    /// - Parameter mixWithOthers: keep other apps' music playing under the game sound.
+    func start(mixWithOthers: Bool = AudioSessionPolicy.mixWithOthers) async throws {
         wantsToRun = true
         // Activating the session can block, so it happens off the main thread.
         try await Task.detached(priority: .userInitiated) {
             let session = AVAudioSession.sharedInstance()
-            try session.setCategory(.playback, mode: .default, options: [])
+            try AudioSessionPolicy.applyGame(mixWithOthers: mixWithOthers)
             try? session.setPreferredIOBufferDuration(0.005)
             try session.setActive(true)
         }.value
@@ -126,6 +127,7 @@ final class AudioRenderer {
         observers.removeAll()
         Task.detached(priority: .utility) {
             try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+            try? AudioSessionPolicy.applyInterface()   // back to library sounds that never interrupt music
         }
     }
 

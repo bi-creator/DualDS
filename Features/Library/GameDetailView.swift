@@ -39,6 +39,7 @@ struct GameDetailView: View {
                 }
                 Section {
                     Button {
+                        InterfaceSound.shared.play(AppTheme.current.sound)
                         dismiss()
                         onPlay()
                     } label: {

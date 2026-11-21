@@ -8,12 +8,15 @@
 
 /* Begin PBXBuildFile section */
 		05EDC3E3CB06297AF23C524D /* EmulatorBridgeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E38023C6E0EA1D9D5DCACBEC /* EmulatorBridgeTests.swift */; };
+		09113346E89012917C2E86E3 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5A53D99050E1F548FD0A1B2 /* AppTheme.swift */; };
 		0D5DC486F3AB811D3F85B65D /* EmulatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81C8799AE240CCB7DD19A48F /* EmulatorView.swift */; };
 		0F5132E9AC62708838E5E680 /* GameLibraryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58A04C849D3E5769A0F2F359 /* GameLibraryTests.swift */; };
+		12A2CED237F11A16A05448AD /* ThemeBackdrop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79436D15694C4BB716AA1B53 /* ThemeBackdrop.swift */; };
 		15487425284FA7A6BD2B1FD5 /* GameCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 093B876A7C7445A8F6F64320 /* GameCardView.swift */; };
 		1648A0DEADFF73A4559024A5 /* SaveState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A01986310B7ACE36AB16155 /* SaveState.swift */; };
 		19F044DD05DE2BD6F02A1EE3 /* ShellTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45139DC66F37D3D8F1107E1 /* ShellTheme.swift */; };
 		1BF9D1A75D33F29A7AA4892E /* EmulatorUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5B794014FAD79D4E78C4767 /* EmulatorUITests.swift */; };
+		2030496D3A3DF9CB986134D5 /* AppThemeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57B910F76DCDC3F614E00BDA /* AppThemeTests.swift */; };
 		275E3D8EB46B0D2798954288 /* LibraryUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B222EEF3635652F56E77EC60 /* LibraryUITests.swift */; };
 		32D1CAC80ABF0C2ECF338965 /* AppConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F42AD7EFE574C666C43DAC /* AppConfiguration.swift */; };
 		360B646FBD6AF60C479A9897 /* GameImportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93A18964107D105D695E0414 /* GameImportService.swift */; };
@@ -23,6 +26,7 @@
 		4C76E4E66CD28E2F971BED83 /* DSScreenLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ABE720993DE78C89DECB35B /* DSScreenLayoutTests.swift */; };
 		4E3A738956D277B112BE3D3E /* ShaderLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDC89111B86E0EEECDABBA2B /* ShaderLibrary.swift */; };
 		545845EB9033762C0FBD665E /* EmulatorControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3308D056BB2DC3DB1F1C95A3 /* EmulatorControlsView.swift */; };
+		57DAA84AD2A885B0028F4B4A /* ThemeUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B97A8FA86E7AA76AEE6E6C2 /* ThemeUITests.swift */; };
 		58E1A9598147929E575F2E71 /* dualds-test.nds in Resources */ = {isa = PBXBuildFile; fileRef = 8AE7DE88F8020FD2C44DFD73 /* dualds-test.nds */; };
 		60562158592A73584EF62DA2 /* Game.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D9003E5FDF0465A1F06D48B /* Game.swift */; };
 		61D9F0098952CBDDB58F81BF /* DuoClamshellLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9663A995276A26E6729671C5 /* DuoClamshellLayoutTests.swift */; };
@@ -34,20 +38,25 @@
 		7A3F5BA6F8B18FF1D78687BB /* SaveStateStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 598644B8E538D4C629F89004 /* SaveStateStoreTests.swift */; };
 		8CC5FD79C388022A36794F8D /* DualDSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE29413637F7AC78235AE7E6 /* DualDSApp.swift */; };
 		927C27421E835033F7EB5E47 /* DuoSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = C84BDD8A8FAB61E1216A8238 /* DuoSupport.swift */; };
+		978159330DF23A8115A3B722 /* AudioSessionPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FC7BBFC55706AE58B779882 /* AudioSessionPolicy.swift */; };
 		9931F010EBFC9275B596D203 /* LICENSE-melonDS.txt in Resources */ = {isa = PBXBuildFile; fileRef = 5B40FED767E00BF7419E8DE6 /* LICENSE-melonDS.txt */; };
 		9BC6690DF6866C8C9D11919C /* SaveStateStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41486E4BF33E19CE1BD67A77 /* SaveStateStore.swift */; };
 		A0A2EC9615E44178D08BBF15 /* LICENSE-DualDS.txt in Resources */ = {isa = PBXBuildFile; fileRef = 6027223C5D17B3FF787CD2DE /* LICENSE-DualDS.txt */; };
+		A9142E0295D146FBF92FA72D /* SoundtrackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89090579225C0D7F07E3F40D /* SoundtrackView.swift */; };
 		B163A49A80C29FDF9D4DE2FD /* ROMHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A1D63A0D0197764103A0D40 /* ROMHeader.swift */; };
 		B31A912E496D918FDB0E2A6B /* DSCoreBridge.mm in Sources */ = {isa = PBXBuildFile; fileRef = DD996E82F350B218D288FA8F /* DSCoreBridge.mm */; };
+		B71E46FC2DE137EF6C926834 /* SoundtrackPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D10A991B567BE1D6751823F5 /* SoundtrackPlayer.swift */; };
 		BBCA4EF7B01D2949FF0ECEAD /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11121B5D69B5F2D48685CB17 /* SettingsView.swift */; };
 		BE5EE1ECCBD324AAA27B20C6 /* DuoClamshellLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCF2A6D2202026E99D365859 /* DuoClamshellLayout.swift */; };
 		C37D29310FC6DE30EDE9CD59 /* AudioRendererTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A444A39973395D98305B3D9 /* AudioRendererTests.swift */; };
+		C6937946D53EC0D4ED170D1F /* InterfaceSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = B90E54D717EDCA3F7EE8EF4E /* InterfaceSound.swift */; };
 		C6F2CA1BDF94380E63080467 /* ROMHeaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16C6EE3EA12578887DED9A7F /* ROMHeaderTests.swift */; };
 		D57775ACB410CB734C9F2A5B /* MetalRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE2807EA4625A2C722F3232C /* MetalRenderer.swift */; };
 		E0DF865F03A0FAFD1FF3C934 /* SaveStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3959EDCAEA2B4D79C8183F4 /* SaveStateView.swift */; };
 		E83C11D30214A94109A9B53D /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = CB7548A266C58875FA0DEB69 /* PrivacyInfo.xcprivacy */; };
 		E989AAC5E3C94F8D76BA60AA /* AppConfigurationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEF330B2047EB4B957352A7B /* AppConfigurationTests.swift */; };
 		EBCEF4FFCB021E07238FFF3F /* GameDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD3DDB2339D2F89D49BD4930 /* GameDetailView.swift */; };
+		ECEF948FFE607EB7B86C45A2 /* ThemePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62C880D421A184703F06DC51 /* ThemePickerView.swift */; };
 		ED296B709583B6598535567A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0FF05971EEF451CC1F4FA888 /* Assets.xcassets */; };
 		EDECC1CC3CF09CC736245ADF /* GameLibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1622198AA820228932B384C6 /* GameLibraryView.swift */; };
 		F32250B509223B120D195888 /* AudioRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE589CFD3BEAD8AAD3E1D9C0 /* AudioRenderer.swift */; };
@@ -85,18 +94,24 @@
 		16C6EE3EA12578887DED9A7F /* ROMHeaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ROMHeaderTests.swift; sourceTree = "<group>"; };
 		1D152084CFB38FD4593F95DB /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
 		1FFE7ACFD609218D6FA7B46E /* DualDSTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = DualDSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		2FC7BBFC55706AE58B779882 /* AudioSessionPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioSessionPolicy.swift; sourceTree = "<group>"; };
 		3308D056BB2DC3DB1F1C95A3 /* EmulatorControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmulatorControlsView.swift; sourceTree = "<group>"; };
 		41486E4BF33E19CE1BD67A77 /* SaveStateStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveStateStore.swift; sourceTree = "<group>"; };
+		4B97A8FA86E7AA76AEE6E6C2 /* ThemeUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeUITests.swift; sourceTree = "<group>"; };
 		519959685C70FBEF75EBC7B4 /* DSScreensView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DSScreensView.swift; sourceTree = "<group>"; };
+		57B910F76DCDC3F614E00BDA /* AppThemeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppThemeTests.swift; sourceTree = "<group>"; };
 		58A04C849D3E5769A0F2F359 /* GameLibraryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameLibraryTests.swift; sourceTree = "<group>"; };
 		598644B8E538D4C629F89004 /* SaveStateStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveStateStoreTests.swift; sourceTree = "<group>"; };
 		5A01986310B7ACE36AB16155 /* SaveState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveState.swift; sourceTree = "<group>"; };
 		5B40FED767E00BF7419E8DE6 /* LICENSE-melonDS.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "LICENSE-melonDS.txt"; sourceTree = "<group>"; };
 		6027223C5D17B3FF787CD2DE /* LICENSE-DualDS.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "LICENSE-DualDS.txt"; sourceTree = "<group>"; };
+		62C880D421A184703F06DC51 /* ThemePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemePickerView.swift; sourceTree = "<group>"; };
 		6ABE720993DE78C89DECB35B /* DSScreenLayoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DSScreenLayoutTests.swift; sourceTree = "<group>"; };
 		6F511BF002C5E7FF3BB3188C /* FirstLaunchUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirstLaunchUITests.swift; sourceTree = "<group>"; };
 		717A99BE341B1022329766D9 /* Base.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Base.xcconfig; sourceTree = "<group>"; };
+		79436D15694C4BB716AA1B53 /* ThemeBackdrop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeBackdrop.swift; sourceTree = "<group>"; };
 		81C8799AE240CCB7DD19A48F /* EmulatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmulatorView.swift; sourceTree = "<group>"; };
+		89090579225C0D7F07E3F40D /* SoundtrackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundtrackView.swift; sourceTree = "<group>"; };
 		8A18EF268FE48574BD26C9E3 /* THIRD_PARTY_NOTICES.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = THIRD_PARTY_NOTICES.txt; sourceTree = "<group>"; };
 		8A444A39973395D98305B3D9 /* AudioRendererTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRendererTests.swift; sourceTree = "<group>"; };
 		8AE7DE88F8020FD2C44DFD73 /* dualds-test.nds */ = {isa = PBXFileReference; path = "dualds-test.nds"; sourceTree = "<group>"; };
@@ -108,14 +123,17 @@
 		AD0FDFFFD03A480F7D5BC18F /* DSCoreBridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DSCoreBridge.h; sourceTree = "<group>"; };
 		B222EEF3635652F56E77EC60 /* LibraryUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryUITests.swift; sourceTree = "<group>"; };
 		B49F0AA7E2D141B0DDB066C1 /* GameStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameStorage.swift; sourceTree = "<group>"; };
+		B90E54D717EDCA3F7EE8EF4E /* InterfaceSound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterfaceSound.swift; sourceTree = "<group>"; };
 		BE589CFD3BEAD8AAD3E1D9C0 /* AudioRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRenderer.swift; sourceTree = "<group>"; };
 		BFCB7FA6903195B321CE7865 /* DualDS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = DualDS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C5A53D99050E1F548FD0A1B2 /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
 		C7AD25171F39622DBA5189E0 /* DualDS-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "DualDS-Bridging-Header.h"; sourceTree = "<group>"; };
 		C84BDD8A8FAB61E1216A8238 /* DuoSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuoSupport.swift; sourceTree = "<group>"; };
 		CB7548A266C58875FA0DEB69 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		CCF2A6D2202026E99D365859 /* DuoClamshellLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuoClamshellLayout.swift; sourceTree = "<group>"; };
 		CEF330B2047EB4B957352A7B /* AppConfigurationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfigurationTests.swift; sourceTree = "<group>"; };
 		D0F934A40D10D73400A2FF1C /* DualDSCore.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = DualDSCore.xcframework; path = Build/DualDSCore.xcframework; sourceTree = "<group>"; };
+		D10A991B567BE1D6751823F5 /* SoundtrackPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundtrackPlayer.swift; sourceTree = "<group>"; };
 		D3959EDCAEA2B4D79C8183F4 /* SaveStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveStateView.swift; sourceTree = "<group>"; };
 		D45139DC66F37D3D8F1107E1 /* ShellTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellTheme.swift; sourceTree = "<group>"; };
 		DD996E82F350B218D288FA8F /* DSCoreBridge.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = DSCoreBridge.mm; sourceTree = "<group>"; };
@@ -142,10 +160,13 @@
 		017C787C3F4E1C072E4B9E3D /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				2FC7BBFC55706AE58B779882 /* AudioSessionPolicy.swift */,
 				93A18964107D105D695E0414 /* GameImportService.swift */,
 				B49F0AA7E2D141B0DDB066C1 /* GameStorage.swift */,
+				B90E54D717EDCA3F7EE8EF4E /* InterfaceSound.swift */,
 				0A1D63A0D0197764103A0D40 /* ROMHeader.swift */,
 				41486E4BF33E19CE1BD67A77 /* SaveStateStore.swift */,
+				D10A991B567BE1D6751823F5 /* SoundtrackPlayer.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -160,12 +181,23 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		3672F1CB86A2F8B66B80BB79 /* Themes */ = {
+			isa = PBXGroup;
+			children = (
+				C5A53D99050E1F548FD0A1B2 /* AppTheme.swift */,
+				79436D15694C4BB716AA1B53 /* ThemeBackdrop.swift */,
+				62C880D421A184703F06DC51 /* ThemePickerView.swift */,
+			);
+			path = Themes;
+			sourceTree = "<group>";
+		};
 		378D109685B57B602E61F386 /* AppUITests */ = {
 			isa = PBXGroup;
 			children = (
 				F5B794014FAD79D4E78C4767 /* EmulatorUITests.swift */,
 				6F511BF002C5E7FF3BB3188C /* FirstLaunchUITests.swift */,
 				B222EEF3635652F56E77EC60 /* LibraryUITests.swift */,
+				4B97A8FA86E7AA76AEE6E6C2 /* ThemeUITests.swift */,
 			);
 			path = AppUITests;
 			sourceTree = "<group>";
@@ -194,6 +226,7 @@
 			isa = PBXGroup;
 			children = (
 				CEF330B2047EB4B957352A7B /* AppConfigurationTests.swift */,
+				57B910F76DCDC3F614E00BDA /* AppThemeTests.swift */,
 				8A444A39973395D98305B3D9 /* AudioRendererTests.swift */,
 				6ABE720993DE78C89DECB35B /* DSScreenLayoutTests.swift */,
 				9663A995276A26E6729671C5 /* DuoClamshellLayoutTests.swift */,
@@ -212,6 +245,14 @@
 				5A01986310B7ACE36AB16155 /* SaveState.swift */,
 			);
 			path = Models;
+			sourceTree = "<group>";
+		};
+		7FBE7DA04C0E2BE88E11AE04 /* Soundtrack */ = {
+			isa = PBXGroup;
+			children = (
+				89090579225C0D7F07E3F40D /* SoundtrackView.swift */,
+			);
+			path = Soundtrack;
 			sourceTree = "<group>";
 		};
 		9D7D762A5FBBC5D2074F5CEB /* Emulator */ = {
@@ -306,6 +347,8 @@
 				EAFE20F74DF9D228531AECED /* Library */,
 				EFFF37461C7604CFD4CF4CFA /* SaveStates */,
 				FEBCC4973C244620D4F230E6 /* Settings */,
+				7FBE7DA04C0E2BE88E11AE04 /* Soundtrack */,
+				3672F1CB86A2F8B66B80BB79 /* Themes */,
 			);
 			path = Features;
 			sourceTree = "<group>";
@@ -509,6 +552,7 @@
 				1BF9D1A75D33F29A7AA4892E /* EmulatorUITests.swift in Sources */,
 				4632F639E6545389556AC7E8 /* FirstLaunchUITests.swift in Sources */,
 				275E3D8EB46B0D2798954288 /* LibraryUITests.swift in Sources */,
+				57DAA84AD2A885B0028F4B4A /* ThemeUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -518,7 +562,9 @@
 			files = (
 				F9FBAAEB2D35684F36FA941D /* AboutView.swift in Sources */,
 				32D1CAC80ABF0C2ECF338965 /* AppConfiguration.swift in Sources */,
+				09113346E89012917C2E86E3 /* AppTheme.swift in Sources */,
 				F32250B509223B120D195888 /* AudioRenderer.swift in Sources */,
+				978159330DF23A8115A3B722 /* AudioSessionPolicy.swift in Sources */,
 				B31A912E496D918FDB0E2A6B /* DSCoreBridge.mm in Sources */,
 				3647871705827E6D0DAF4774 /* DSScreenLayout.swift in Sources */,
 				6C7476E4ABE4F588E71A5575 /* DSScreensView.swift in Sources */,
@@ -535,6 +581,7 @@
 				EDECC1CC3CF09CC736245ADF /* GameLibraryView.swift in Sources */,
 				753A74FC31449BB1989D2CC6 /* GameLibraryViewModel.swift in Sources */,
 				641EC43A7924759F3A58BF14 /* GameStorage.swift in Sources */,
+				C6937946D53EC0D4ED170D1F /* InterfaceSound.swift in Sources */,
 				D57775ACB410CB734C9F2A5B /* MetalRenderer.swift in Sources */,
 				B163A49A80C29FDF9D4DE2FD /* ROMHeader.swift in Sources */,
 				1648A0DEADFF73A4559024A5 /* SaveState.swift in Sources */,
@@ -543,6 +590,10 @@
 				BBCA4EF7B01D2949FF0ECEAD /* SettingsView.swift in Sources */,
 				4E3A738956D277B112BE3D3E /* ShaderLibrary.swift in Sources */,
 				19F044DD05DE2BD6F02A1EE3 /* ShellTheme.swift in Sources */,
+				B71E46FC2DE137EF6C926834 /* SoundtrackPlayer.swift in Sources */,
+				A9142E0295D146FBF92FA72D /* SoundtrackView.swift in Sources */,
+				12A2CED237F11A16A05448AD /* ThemeBackdrop.swift in Sources */,
+				ECEF948FFE607EB7B86C45A2 /* ThemePickerView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -551,6 +602,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E989AAC5E3C94F8D76BA60AA /* AppConfigurationTests.swift in Sources */,
+				2030496D3A3DF9CB986134D5 /* AppThemeTests.swift in Sources */,
 				C37D29310FC6DE30EDE9CD59 /* AudioRendererTests.swift in Sources */,
 				4C76E4E66CD28E2F971BED83 /* DSScreenLayoutTests.swift in Sources */,
 				61D9F0098952CBDDB58F81BF /* DuoClamshellLayoutTests.swift in Sources */,
