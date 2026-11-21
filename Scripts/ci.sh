@@ -264,6 +264,14 @@ play_games() {
     local out="$repo/Build/shots/$g"; rm -rf "$out"; mkdir -p "$out"
     echo "-- $g"
     "$ROOT/Build/core-host/rom_player" "$rom" "$script" "$out" || failed=1
+    # test/play_stage2.txt etc. run on the TEST_START variants in Build/test/<g>_stage2.nds
+    for extra in "$repo/games/$g"/test/play_*.txt; do
+      [ -e "$extra" ] || continue
+      local v; v="$(basename "$extra" .txt)"; v="${v#play_}"
+      [ -f "$repo/Build/test/${g}_$v.nds" ] || { echo "-- $g/$v: no Build/test/${g}_$v.nds"; failed=1; continue; }
+      mkdir -p "$out/$v"; echo "-- $g ($v)"
+      "$ROOT/Build/core-host/rom_player" "$repo/Build/test/${g}_$v.nds" "$extra" "$out/$v" || failed=1
+    done
   done
   return $failed
 }
