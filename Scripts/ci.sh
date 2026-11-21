@@ -134,11 +134,20 @@ testflight() {
 PLIST
   run_logged licenses "$ROOT/Scripts/verify-licenses.sh"
   run_logged xcodegen xcodegen generate --spec project.yml
-  # Archive unsigned: development signing would need a registered test device. The export step
-  # signs the app for App Store distribution (automatic signing, distribution certificate).
+  # Archive ad-hoc signed: development signing would need a registered test device, and a fully
+  # unsigned archive would lose the entitlements (App Group for the asset-pack extension). The
+  # export step re-signs for App Store distribution (automatic signing, distribution certificate)
+  # and keeps the entitlements embedded here.
   run_logged archive xcodebuild -project DualDS.xcodeproj -scheme DualDS -configuration Release \
     -destination 'generic/platform=iOS' -archivePath "$archive" \
-    CURRENT_PROJECT_VERSION="$build" CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" archive
+    CURRENT_PROJECT_VERSION="$build" CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY="-" \
+    AD_HOC_CODE_SIGNING_ALLOWED=YES CODE_SIGNING_REQUIRED=NO PROVISIONING_PROFILE_SPECIFIER="" archive
+  local app="$archive/Products/Applications/DualDS.app"
+  for bin in "$app" "$app/Extensions/FoldPlayAssets.appex"; do
+    codesign -d --entitlements - "$bin" 2>/dev/null | grep -q "group.$bundle" || {
+      echo "error: $(basename "$bin") lost its App Group entitlement" >&2; codesign -d --entitlements - "$bin" >&2; return 1; }
+  done
+  echo "entitlements ok (app + FoldPlayAssets)"
   run_logged upload xcodebuild -exportArchive -archivePath "$archive" -exportOptionsPlist "$opts" \
     -exportPath "$ROOT/Build/export-$build" -allowProvisioningUpdates
   # GPL-3.0 corresponding source: tag exactly what was uploaded and publish the tag.
