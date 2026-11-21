@@ -1,7 +1,7 @@
-// DualDS — FoldPlay Store: StoreKit purchases (local StoreKit test session) and game packages.
+// DualDS — FoldPlay Store: game list, StoreKit purchases (local test session) and the
+// purchase-gated install of FoldPlay Originals.
 // Copyright (C) 2026 DualDS contributors. GPL-3.0-or-later.
 
-import CryptoKit
 import StoreKitTest
 import SwiftData
 import XCTest
@@ -10,102 +10,136 @@ import XCTest
 @MainActor
 final class StoreTests: XCTestCase {
     private var session: SKTestSession!
-    private let game = OriginalsCatalog.backAlleyBrawl
+    private var root: URL!
+    private var storage: GameStorage!
+    private var context: ModelContext!
+    private let productID = "com.bicreator.dualds.backalleybrawl"
 
     override func setUp() async throws {
         session = try SKTestSession(configurationFileNamed: "FoldPlay")
         session.resetToDefaultState()
         session.disableDialogs = true
         session.clearTransactions()
+        root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        storage = GameStorage(root: root)
+        let container = try ModelContainer(for: Game.self, SaveState.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+        context = ModelContext(container)
     }
 
     override func tearDown() async throws {
         session.clearTransactions()
+        try? FileManager.default.removeItem(at: root)
     }
 
-    func testCatalogProductsMatchTheStoreKitConfiguration() async throws {
+    // MARK: Game list
+
+    private func catalogJSON(_ games: String, version: Int = 1) -> Data {
+        Data("{\"version\": \(version), \"games\": [\(games)]}".utf8)
+    }
+
+    private func entry(id: String = "g", product: String = "p", file: String = "games/g.nds",
+                       sha: String = String(repeating: "a", count: 64)) -> String {
+        """
+        {"id":"\(id)","productID":"\(product)","title":"T","tagline":"t","details":"d",
+         "file":"\(file)","sha256":"\(sha)","size":1,"artwork":null}
+        """
+    }
+
+    func testCatalogParsesAndValidates() throws {
+        XCTAssertEqual(try OriginalsCatalog.decode(catalogJSON(entry())).count, 1)
+        XCTAssertThrowsError(try OriginalsCatalog.decode(catalogJSON(entry(), version: 2)))
+        XCTAssertThrowsError(try OriginalsCatalog.decode(catalogJSON(entry() + "," + entry(product: "q"))), "duplicate id")
+        XCTAssertThrowsError(try OriginalsCatalog.decode(catalogJSON(entry(sha: "xyz"))), "bad hash")
+        XCTAssertThrowsError(try OriginalsCatalog.decode(catalogJSON(entry(file: "../etc/x"))), "path traversal")
+        XCTAssertThrowsError(try OriginalsCatalog.decode(catalogJSON(entry(file: "/abs"))), "absolute path")
+    }
+
+    func testAppShipsAFallbackGameList() throws {
+        let catalog = OriginalsCatalog(remoteURL: URL(string: "https://example.invalid/games.json")!,
+                                       cacheURL: root.appendingPathComponent("none.json"))
+        let game = try XCTUnwrap(catalog.game(forProduct: productID), "Resources/originals-fallback.json lists Back Alley Brawl")
+        XCTAssertEqual(game.id, "back-alley-brawl")
+        XCTAssertTrue(game.file.hasPrefix("games/"))
+    }
+
+    // MARK: StoreKit
+
+    func testProductLoadsFromTheStoreKitConfiguration() async throws {
         let store = StoreService()
-        await store.loadProducts()
-        let product = try XCTUnwrap(store.products[game.productID],
-                                    "product missing: \(store.products.keys.sorted()) error: \(store.loadError ?? "none")")
+        await store.loadProducts(ids: [productID])
+        let product = try XCTUnwrap(store.products[productID], "error: \(store.loadError ?? "none")")
         XCTAssertEqual(product.type, .nonConsumable)
-        XCTAssertEqual(product.displayName, "Back Alley Brawl")
-        XCTAssertNil(store.loadError)
     }
 
-    func testNotOwnedUntilBought() async throws {
+    func testPurchaseGrantsVerifiedOwnershipAndRefundRevokesIt() async throws {
         let store = StoreService()
-        await store.refreshEntitlements()
-        XCTAssertFalse(store.isOwned(game))
-    }
-
-    func testPurchaseGrantsOwnership() async throws {
-        let store = StoreService()
-        await store.loadProducts()
-        let product = try XCTUnwrap(store.products[game.productID])
-        let result = try await product.purchase()
-        let owned = await store.handle(result)
+        let notYet = await store.verifiedOwnership(of: productID)
+        XCTAssertFalse(notYet)
+        await store.loadProducts(ids: [productID])
+        let product = try XCTUnwrap(store.products[productID])
+        let bought = await store.handle(try await product.purchase())
+        XCTAssertTrue(bought)
+        let owned = await store.verifiedOwnership(of: productID)
         XCTAssertTrue(owned)
-        XCTAssertTrue(store.isOwned(game))
-        await store.refreshEntitlements()
-        XCTAssertTrue(store.isOwned(game), "ownership survives a fresh entitlement check")
-    }
 
-    func testRefundRemovesOwnership() async throws {
-        let store = StoreService()
-        await store.loadProducts()
-        let product = try XCTUnwrap(store.products[game.productID])
-        _ = await store.handle(try await product.purchase())
         let transaction = try XCTUnwrap(session.allTransactions().first)
         try session.refundTransaction(identifier: UInt(transaction.identifier))
-        // StoreKit applies the refund asynchronously; give it up to two seconds.
-        for _ in 0..<20 {
-            await store.refreshEntitlements()
-            if !store.isOwned(game) { break }
+        var stillOwned = true
+        for _ in 0..<20 {   // StoreKit applies the refund asynchronously
+            stillOwned = await store.verifiedOwnership(of: productID)
+            if !stillOwned { break }
             try await Task.sleep(for: .milliseconds(100))
         }
-        XCTAssertFalse(store.isOwned(game))
+        XCTAssertFalse(stillOwned)
     }
 
-    // MARK: Packages
+    // MARK: Purchase-gated install
 
-    func testPackageRoundTrip() throws {
-        // Same algorithm as Scripts/package-originals.py.
-        let rom = Data((0..<1000).map { UInt8($0 % 251) })
-        let nonce = Data(SHA256.hash(data: rom).prefix(16))
-        var scrambled = rom
-        var counter: UInt64 = 0
-        var offset = 0
-        while offset < scrambled.count {
-            var block = Data("FoldPlay Originals v1".utf8)
-            block.append(nonce)
-            withUnsafeBytes(of: counter.littleEndian) { block.append(contentsOf: $0) }
-            let stream = Array(SHA256.hash(data: block))
-            for i in 0..<min(32, scrambled.count - offset) { scrambled[offset + i] ^= stream[i] }
-            offset += 32
-            counter += 1
+    /// A catalog entry for Back Alley Brawl's product that points at DualDS's own test ROM.
+    private func fixtureGame(sha: String? = nil) throws -> (OriginalGame, LocalDirectorySource) {
+        let fixture = try XCTUnwrap(Bundle(for: Self.self).url(forResource: "dualds-test", withExtension: "nds"))
+        let hash = try sha ?? OriginalsInstaller.sha256Hex(of: fixture)
+        let game = OriginalGame(id: "back-alley-brawl", productID: productID, title: "Back Alley Brawl", tagline: "",
+                                details: "", file: "games/dualds-test.nds", sha256: hash, size: 0, artwork: nil)
+        return (game, LocalDirectorySource(directory: fixture.deletingLastPathComponent()))
+    }
+
+    func testInstallRefusesWithoutAPurchase() async throws {
+        let (game, source) = try fixtureGame()
+        do {
+            _ = try await OriginalsInstaller.install(game, store: StoreService(), source: source, storage: storage, context: context)
+            XCTFail("installed without a purchase")
+        } catch let error as OriginalsInstaller.InstallError {
+            XCTAssertEqual(error, .notPurchased)
         }
-        let package = OriginalPackage.magic + nonce + scrambled
-        XCTAssertEqual(try OriginalPackage.decode(package), rom)
-        XCTAssertThrowsError(try OriginalPackage.decode(Data("nope".utf8)))
+        XCTAssertEqual(try context.fetch(FetchDescriptor<Game>()).count, 0)
     }
 
-    /// Runs when the app was built with the real game package (Build/Originals); skipped otherwise.
-    func testBundledGameUnpacksToAValidDSGameAndInstallsOnce() async throws {
-        guard OriginalPackage.url(for: game) != nil else { throw XCTSkip("No packaged game in this build") }
-        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
-        defer { try? FileManager.default.removeItem(at: root) }
-        let storage = GameStorage(root: root)
-        let container = try ModelContainer(for: Game.self, SaveState.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))
-        let context = ModelContext(container)
+    func testInstallAfterPurchaseAddsTheGameOnce() async throws {
+        let store = StoreService()
+        await store.loadProducts(ids: [productID])
+        _ = await store.handle(try await XCTUnwrap(store.products[productID]).purchase())
+        let (game, source) = try fixtureGame()
 
-        let first = try await OriginalsInstaller.install(game, storage: storage, context: context)
+        let first = try await OriginalsInstaller.install(game, store: store, source: source, storage: storage, context: context)
         XCTAssertEqual(first, .added)
         let games = try context.fetch(FetchDescriptor<Game>())
-        XCTAssertEqual(games.count, 1)
-        XCTAssertEqual(games.first?.title, game.title)
+        XCTAssertEqual(games.map(\.title), ["Back Alley Brawl"])
         XCTAssertTrue(OriginalsInstaller.isInLibrary(game, games: games))
-        let second = try await OriginalsInstaller.install(game, storage: storage, context: context)
+        let second = try await OriginalsInstaller.install(game, store: store, source: source, storage: storage, context: context)
         XCTAssertEqual(second, .alreadyInLibrary)
+    }
+
+    func testInstallRejectsAFileThatDoesNotMatchTheGameList() async throws {
+        let store = StoreService()
+        await store.loadProducts(ids: [productID])
+        _ = await store.handle(try await XCTUnwrap(store.products[productID]).purchase())
+        let (game, source) = try fixtureGame(sha: String(repeating: "0", count: 64))
+        do {
+            _ = try await OriginalsInstaller.install(game, store: store, source: source, storage: storage, context: context)
+            XCTFail("accepted a file with the wrong hash")
+        } catch let error as OriginalsInstaller.InstallError {
+            XCTAssertEqual(error, .corrupt)
+        }
     }
 }

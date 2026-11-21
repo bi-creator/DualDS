@@ -17,6 +17,9 @@ enum AppConfiguration {
     /// Each release must also be tagged there (see Documentation/LICENSING_REPORT.md).
     static let sourceCodeURL: URL? = URL(string: "https://github.com/bi-creator/DualDS")
 
+    /// FoldPlay Originals game list (static JSON on the FoldPlay website, repo bi-creator/foldplay-privacy).
+    static let originalsCatalogURL = URL(string: "https://foldplay-privacy.vercel.app/games.json")!
+
     /// Privacy policy page (repo bi-creator/foldplay-privacy, deployed on Vercel). The same URL goes
     /// into App Store Connect, App Privacy, Privacy Policy URL.
     static let privacyPolicyURL: URL? = URL(string: "https://foldplay-privacy.vercel.app/privacy")

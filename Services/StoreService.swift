@@ -1,13 +1,13 @@
 // DualDS — in-app purchases for FoldPlay Originals (StoreKit 2).
 // Copyright (C) 2026 DualDS contributors. GPL-3.0-or-later.
 //
-// Apple handles payment, receipts and Family Sharing. FoldPlay keeps nothing on a server: it asks
-// StoreKit which products this Apple Account owns, and unpacks owned games into the library.
+// Apple handles payment and receipts. FoldPlay keeps nothing on a server: it asks StoreKit which
+// products this Apple Account owns. StoreKit 2 verifies Apple's signature on each transaction on
+// the device; only `.verified`, unrevoked transactions count as owned.
 
 import Foundation
 import Observation
 import StoreKit
-import SwiftData
 
 @MainActor
 @Observable
@@ -22,8 +22,7 @@ final class StoreService {
 
     init() {}
 
-    /// Starts listening for purchases made elsewhere (other devices, Ask to Buy, refunds) and
-    /// loads products and ownership. Call once at launch.
+    /// Listens for purchases made elsewhere (other devices, Ask to Buy, refunds). Call once at launch.
     func start() {
         guard updatesTask == nil else { return }
         updatesTask = Task { [weak self] in
@@ -31,17 +30,15 @@ final class StoreService {
                 await self?.process(update)
             }
         }
-        Task {
-            await loadProducts()
-            await refreshEntitlements()
-        }
+        Task { await refreshEntitlements() }
     }
 
-    func loadProducts() async {
+    func loadProducts(ids: [String]) async {
+        guard !ids.isEmpty else { products = [:]; return }
         isLoading = true
         defer { isLoading = false }
         do {
-            let list = try await Product.products(for: OriginalsCatalog.all.map(\.productID))
+            let list = try await Product.products(for: ids)
             products = Dictionary(uniqueKeysWithValues: list.map { ($0.id, $0) })
             loadError = list.isEmpty ? "The FoldPlay Store isn't available right now." : nil
         } catch {
@@ -57,18 +54,28 @@ final class StoreService {
         owned = current
     }
 
-    func isOwned(_ game: OriginalGame) -> Bool { owned.contains(game.productID) }
+    func isOwned(_ productID: String) -> Bool { owned.contains(productID) }
 
-    /// Handles the outcome of a purchase sheet. Returns true when the game is now owned.
+    /// Fresh check straight from StoreKit (not the cached set): an Apple-signed, verified,
+    /// unrevoked transaction for this product. Gates every game download.
+    func verifiedOwnership(of productID: String) async -> Bool {
+        for await result in Transaction.currentEntitlements {
+            if case .verified(let t) = result, t.productID == productID, t.revocationDate == nil {
+                owned.insert(productID)
+                return true
+            }
+        }
+        owned.remove(productID)
+        return false
+    }
+
+    /// Handles the outcome of a purchase sheet. Returns true when the product is now owned.
     @discardableResult
     func handle(_ result: Product.PurchaseResult) async -> Bool {
         switch result {
-        case .success(let verification):
-            return await process(verification)
-        case .pending, .userCancelled:
-            return false
-        @unknown default:
-            return false
+        case .success(let verification): return await process(verification)
+        case .pending, .userCancelled: return false
+        @unknown default: return false
         }
     }
 
@@ -81,43 +88,9 @@ final class StoreService {
     @discardableResult
     private func process(_ verification: VerificationResult<Transaction>) async -> Bool {
         guard case .verified(let transaction) = verification else { return false }
-        if transaction.revocationDate == nil {
-            owned.insert(transaction.productID)
-        } else {
-            owned.remove(transaction.productID)
-        }
+        if transaction.revocationDate == nil { owned.insert(transaction.productID) }
+        else { owned.remove(transaction.productID) }
         await transaction.finish()
         return transaction.revocationDate == nil
-    }
-}
-
-/// Puts an owned FoldPlay Original into the library. Main actor: it uses the library's ModelContext;
-/// unpacking and copying the file run off the main thread.
-@MainActor
-enum OriginalsInstaller {
-    enum Outcome: Equatable { case added, alreadyInLibrary }
-
-    static func install(_ game: OriginalGame, storage: GameStorage, context: ModelContext,
-                        bundle: Bundle = .main) async throws -> Outcome {
-        let rom = try await Task.detached(priority: .userInitiated) { try OriginalPackage.unpack(game, bundle: bundle) }.value
-        defer { try? FileManager.default.removeItem(at: rom) }
-        let existing = Set(((try? context.fetch(FetchDescriptor<Game>())) ?? []).map(\.contentHash))
-        do {
-            let imported = try await GameImportService(storage: storage).importROM(from: rom, existingHashes: existing)
-            let entry = Game(imported: imported)
-            entry.title = game.title
-            context.insert(entry)
-            try context.save()
-            return .added
-        } catch GameImportError.duplicate {
-            return .alreadyInLibrary
-        }
-    }
-
-    /// True if this game is already in the library. The package's nonce is the first 16 bytes of
-    /// the ROM's SHA-256, which is how the importer identifies games (Game.contentHash, hex).
-    static func isInLibrary(_ game: OriginalGame, games: [Game], bundle: Bundle = .main) -> Bool {
-        guard let prefix = OriginalPackage.hashPrefix(for: game, in: bundle) else { return false }
-        return games.contains { $0.contentHash.lowercased().hasPrefix(prefix) }
     }
 }

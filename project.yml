@@ -34,15 +34,17 @@ targets:
       - path: Rendering
       - path: EmulatorBridge
       - path: Resources
-      # FoldPlay Originals game packages (built from ../FoldPlayGames by `ci.sh games`; never in git).
-      - path: Build/Originals
-        type: folder
-        buildPhase: resources
-        optional: true
     dependencies:
       # Built by Scripts/build-core.sh (melonDS + DualDSCore, static, device + simulator slices).
       - framework: Build/DualDSCore.xcframework
         embed: false
+      # Downloads FoldPlay Originals (Apple-hosted asset packs).
+      - target: FoldPlayAssets
+    entitlements:
+      path: App/DualDS.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.$(DUALDS_BUNDLE_ID)
     info:
       path: App/Info.plist
       properties:
@@ -55,6 +57,10 @@ targets:
         UIRequiresFullScreen: false
         ITSAppUsesNonExemptEncryption: false
         NSAppleMusicUsageDescription: FoldPlay plays the songs you pick from Apple Music while you play games.
+        # Apple-Hosted Background Assets (FoldPlay Originals are on-demand asset packs).
+        BAAppGroupID: group.$(DUALDS_BUNDLE_ID)
+        BAHasManagedAssetPacks: true
+        BAUsesAppleHosting: true
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
           - UIInterfaceOrientationLandscapeLeft
@@ -85,6 +91,29 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         SWIFT_OBJC_BRIDGING_HEADER: EmulatorBridge/DualDS-Bridging-Header.h
+  FoldPlayAssets:
+    type: extensionkit-extension
+    platform: iOS
+    deploymentTarget: "26.0"
+    sources:
+      - path: AssetsExtension
+    info:
+      path: AssetsExtension/Info.plist
+      properties:
+        CFBundleDisplayName: FoldPlay Assets
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        EXAppExtensionAttributes:
+          EXExtensionPointIdentifier: com.apple.background-asset-downloader-extension
+    entitlements:
+      path: AssetsExtension/FoldPlayAssets.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.$(DUALDS_BUNDLE_ID)
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(DUALDS_BUNDLE_ID).assets
+        GENERATE_INFOPLIST_FILE: NO
   DualDSTests:
     type: bundle.unit-test
     platform: iOS

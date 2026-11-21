@@ -133,8 +133,6 @@ testflight() {
 </dict></plist>
 PLIST
   run_logged licenses "$ROOT/Scripts/verify-licenses.sh"
-  # Every FoldPlay Original sold in the store must ship in the build.
-  ls "$ROOT"/Build/Originals/*.fpg >/dev/null 2>&1 || { echo "error: no game packages in Build/Originals; run the games step first" >&2; return 1; }
   run_logged xcodegen xcodegen generate --spec project.yml
   # Archive unsigned: development signing would need a registered test device. The export step
   # signs the app for App Store distribution (automatic signing, distribution certificate).
@@ -157,7 +155,31 @@ sim_info_impl() {
   echo "--- json ---"
   xcrun simctl list devices available -j
 }
-sim_info() { run_logged sim-info sim_info_impl; }
+sim_info() {
+  run_logged sim-info sim_info_impl
+  run_logged sdk-ref sdk_reference
+}
+
+# Copies Xcode templates and Swift interfaces that the app code depends on into Build/sdk-ref
+# (read-only reference while writing code; the Xcode folder itself isn't shared with tools).
+sdk_reference() {
+  local dev out tpl sdk
+  dev="$(xcode-select -p)"
+  out="$ROOT/Build/sdk-ref"
+  mkdir -p "$out/templates" "$out/swiftinterface"
+  tpl="$(find "$dev/../" -type d -iname "*Background Download*" -path "*Templates*" 2>/dev/null | head -5)"
+  echo "templates: $tpl"
+  while IFS= read -r t; do [ -n "$t" ] && cp -R "$t" "$out/templates/" ; done <<< "$tpl"
+  sdk="$(xcrun --sdk iphonesimulator --show-sdk-path)"
+  for fw in BackgroundAssets StoreKit ExtensionFoundation; do
+    find "$sdk/System/Library/Frameworks/$fw.framework" -name "*.swiftinterface" -path "*arm64*" 2>/dev/null | head -2 | while read -r f; do
+      cp "$f" "$out/swiftinterface/$fw-$(basename "$f")"
+    done
+  done
+  for tool in ba-package ba-serve; do xcrun --find "$tool" 2>/dev/null && "$(xcrun --find "$tool")" --help 2>&1 | head -40 > "$out/$tool-help.txt"; done
+  ls -R "$out/templates" | head -50
+  ls "$out/swiftinterface"
+}
 sim_run() { run_logged sim-run sim_run_impl; }
 
 phase1() {
@@ -223,8 +245,11 @@ games() {
   run_logged games-build "$repo/Scripts/build.sh" $only
   mkdir -p "$ROOT/Build/import"
   cp "$repo"/Build/out/*.nds "$ROOT/Build/import/" 2>/dev/null || true
-  # Package the games for the app bundle (Build/Originals/*.fpg, picked up by project.yml).
-  run_logged originals python3 "$ROOT/Scripts/package-originals.py" "$repo"/Build/out/*.nds "$ROOT/Build/Originals"
+  # Apple-hosted asset packs (Build/asset-packs/*.aar) and the store's game list (games.json on the
+  # FoldPlay website, plus a fallback copy shipped in the app).
+  if [ -x "$repo/Scripts/make-asset-packs.sh" ]; then
+    run_logged asset-packs "$repo/Scripts/make-asset-packs.sh" "$(cd "$ROOT/.." && pwd)/foldplay-privacy" "$ROOT/Resources/originals-fallback.json"
+  fi
 }
 
 core() {

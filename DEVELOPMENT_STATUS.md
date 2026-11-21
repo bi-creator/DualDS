@@ -217,14 +217,26 @@ Created: `project.yml` (XcodeGen), `Config/*.xcconfig`, `App/`, `Features/{Libra
   stages (night street, harbor docks, neon rooftops), three named bosses, breakable cans with food,
   original PSG chiptune music per stage, touch-screen HUD. `GameROMUITests` plays it on the folded
   layout and loads stages 2 and 3 from test-only ROM variants.
-* StoreKit 2 purchase flow: `StoreService` (products, entitlements, Transaction.updates, restore),
-  `StoreView` (bag button in the library), `OriginalsInstaller` (unpacks the bundled game into the
-  library). Games ship as scrambled packages in `Build/Originals` (gitignored; built by the `games`
-  step via `Scripts/package-originals.py`); `testflight` refuses to upload without them.
+* StoreKit 2 purchase flow: `StoreService` (products, entitlements, Transaction.updates, restore,
+  `verifiedOwnership`), `StoreView` (bag button in the library).
+* Games are **not in the app bundle**. Each Original is an on-demand **Apple-hosted asset pack**
+  (Background Assets, iOS 26.4+; extension target `FoldPlayAssets`, App Group
+  `group.com.bicreator.dualds`). `OriginalsInstaller` first checks StoreKit on the device for a
+  verified, unrevoked transaction, and only then asks Apple to download the pack; it then checks the
+  ROM's SHA-256 against the game list and adds it to the library. Older iOS shows the store but
+  cannot download.
+* Game list: `https://foldplay-privacy.vercel.app/games.json` (`OriginalsCatalog`, cached, with
+  `Resources/originals-fallback.json` shipped as a fallback). Adding a game needs no app update: new
+  IAP + new asset pack + new entry in games.json.
+* Pipeline (FoldPlayGames): `games/<name>/game.json` per game → `Scripts/make-asset-packs.sh`
+  (run by `ci.sh games`) builds `Build/asset-packs/<id>.aar` with `xcrun ba-package` and writes
+  games.json + artwork into ../foldplay-privacy and the app's fallback copy. Upload the .aar files
+  to App Store Connect (Transporter) before the build that needs them.
 * In-app purchase `com.bicreator.dualds.backalleybrawl` (Apple ID 6837720558), non-consumable,
   ₹99 base (India) / US$0.99. Must be submitted together with the next app version.
-* Tests: `StoreTests` (SKTestSession: product, purchase, refund, package round trip, real package
-  install), `StoreUITests`. Local StoreKit config: `Config/FoldPlay.storekit` (also the Run scheme's).
+* Tests: `StoreTests` (game-list validation, fallback list, SKTestSession product, purchase and
+  refund, install refused without purchase, install once after purchase, hash mismatch rejected;
+  downloads via `LocalDirectorySource`), `StoreUITests`. Local StoreKit config: `Config/FoldPlay.storekit` (also the Run scheme's).
 
 ## Repository
 
