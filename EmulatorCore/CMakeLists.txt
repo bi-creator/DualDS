@@ -34,6 +34,10 @@ if (NOT CMAKE_SYSTEM_NAME STREQUAL "iOS")
     target_link_libraries(dualds_core_tests PRIVATE dualdscore)
     find_package(Threads REQUIRED)
     target_link_libraries(dualds_core_tests PRIVATE Threads::Threads)
+    # Headless ROM player for automated FoldPlay Originals tests (scripted input -> PNG screenshots).
+    find_package(ZLIB REQUIRED)
+    add_executable(rom_player ../Tests/RomPlayer/rom_player.cpp)
+    target_link_libraries(rom_player PRIVATE dualdscore Threads::Threads ZLIB::ZLIB)
     add_test(NAME core_tests
              COMMAND dualds_core_tests ${CMAKE_CURRENT_SOURCE_DIR}/../Tests/Fixtures/testrom/dualds-test.nds)
 endif()

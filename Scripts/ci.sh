@@ -134,20 +134,39 @@ testflight() {
 PLIST
   run_logged licenses "$ROOT/Scripts/verify-licenses.sh"
   run_logged xcodegen xcodegen generate --spec project.yml
-  # Archive ad-hoc signed: development signing would need a registered test device, and a fully
-  # unsigned archive would lose the entitlements (App Group for the asset-pack extension). The
-  # export step re-signs for App Store distribution (automatic signing, distribution certificate)
-  # and keeps the entitlements embedded here.
+  # Archive unsigned: development signing would need a registered test device. An unsigned binary
+  # carries no entitlements, so stamp the App Group (shared by the app and the asset-pack extension)
+  # with a local ad-hoc signature; the export step re-signs for App Store distribution (automatic
+  # signing, distribution certificate) and keeps these entitlements.
   run_logged archive xcodebuild -project DualDS.xcodeproj -scheme DualDS -configuration Release \
     -destination 'generic/platform=iOS' -archivePath "$archive" \
-    CURRENT_PROJECT_VERSION="$build" CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY="-" \
-    AD_HOC_CODE_SIGNING_ALLOWED=YES CODE_SIGNING_REQUIRED=NO PROVISIONING_PROFILE_SPECIFIER="" archive
-  local app="$archive/Products/Applications/DualDS.app"
+    CURRENT_PROJECT_VERSION="$build" CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" archive
+  local app="$archive/Products/Applications/DualDS.app" ent="$ROOT/Build/archive-entitlements.plist"
+  cat > "$ent" <<PLIST
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+  <key>com.apple.security.application-groups</key><array><string>group.$bundle</string></array>
+</dict></plist>
+PLIST
+  codesign -f -s - --entitlements "$ent" "$app/Extensions/FoldPlayAssets.appex"
+  codesign -f -s - --entitlements "$ent" "$app"
   for bin in "$app" "$app/Extensions/FoldPlayAssets.appex"; do
     codesign -d --entitlements - "$bin" 2>/dev/null | grep -q "group.$bundle" || {
-      echo "error: $(basename "$bin") lost its App Group entitlement" >&2; codesign -d --entitlements - "$bin" >&2; return 1; }
+      echo "error: $(basename "$bin") has no App Group entitlement" >&2; return 1; }
   done
   echo "entitlements ok (app + FoldPlayAssets)"
+  # Dry run: export the signed .ipa locally and check the distribution signature kept the App Group.
+  sed 's#<string>upload</string>#<string>export</string>#' "$opts" > "$ROOT/Build/ExportOptions-local.plist"
+  run_logged export-check xcodebuild -exportArchive -archivePath "$archive" \
+    -exportOptionsPlist "$ROOT/Build/ExportOptions-local.plist" -exportPath "$ROOT/Build/export-check-$build" -allowProvisioningUpdates
+  local ipa; ipa="$(ls "$ROOT/Build/export-check-$build"/*.ipa | head -1)"
+  rm -rf "$ROOT/Build/ipa-check" && mkdir -p "$ROOT/Build/ipa-check" && unzip -q "$ipa" -d "$ROOT/Build/ipa-check"
+  for bin in "$ROOT"/Build/ipa-check/Payload/*.app "$ROOT"/Build/ipa-check/Payload/*.app/Extensions/*.appex; do
+    codesign -d --entitlements - "$bin" 2>/dev/null | grep -q "group.$bundle" || {
+      echo "error: signed $(basename "$bin") lost the App Group" >&2; codesign -d --entitlements - "$bin" >&2; return 1; }
+  done
+  echo "signed ipa keeps the App Group (app + extension)"
   run_logged upload xcodebuild -exportArchive -archivePath "$archive" -exportOptionsPlist "$opts" \
     -exportPath "$ROOT/Build/export-$build" -allowProvisioningUpdates
   # GPL-3.0 corresponding source: tag exactly what was uploaded and publish the tag.
@@ -231,6 +250,24 @@ privacy_site() {
 
 # Build the FoldPlay Games ROMs (sibling repo ../FoldPlayGames) and stage them for sim-run.
 # Optional Build/requests/games-only.txt names one game.
+play_games() {
+  local repo="$1"; shift
+  local lto=ON; [ "$(uname)" = Linux ] && lto=OFF
+  cmake -S "$ROOT/EmulatorCore" -B "$ROOT/Build/core-host" -G Ninja -DCMAKE_BUILD_TYPE=Release -DENABLE_LTO_RELEASE=$lto >/dev/null
+  cmake --build "$ROOT/Build/core-host" --target rom_player
+  local list=("$@") failed=0
+  if [ ${#list[@]} -eq 0 ]; then for d in "$repo"/games/*/; do list+=("$(basename "$d")"); done; fi
+  for g in "${list[@]}"; do
+    local script="$repo/games/$g/test/play.txt"
+    [ -f "$script" ] || { echo "-- $g: no test/play.txt"; continue; }
+    local rom; rom="$(ls -t "$repo/games/$g"/*.nds | head -1)"
+    local out="$repo/Build/shots/$g"; rm -rf "$out"; mkdir -p "$out"
+    echo "-- $g"
+    "$ROOT/Build/core-host/rom_player" "$rom" "$script" "$out" || failed=1
+  done
+  return $failed
+}
+
 games() {
   local repo; repo="$(cd "$ROOT/.." && pwd)/FoldPlayGames"
   [ -x "$repo/Scripts/build.sh" ] || { echo "missing $repo/Scripts/build.sh" >&2; return 66; }
@@ -254,6 +291,9 @@ games() {
   run_logged games-build "$repo/Scripts/build.sh" $only
   mkdir -p "$ROOT/Build/import"
   cp "$repo"/Build/out/*.nds "$ROOT/Build/import/" 2>/dev/null || true
+  # Automated play tests: games/<g>/test/play.txt runs on the headless core (Tests/RomPlayer) and
+  # leaves screenshots in FoldPlayGames/Build/shots/<g>/.
+  run_logged games-play play_games "$repo" $only
   # Apple-hosted asset packs (Build/asset-packs/*.aar) and the store's game list (games.json on the
   # FoldPlay website, plus a fallback copy shipped in the app).
   if [ -x "$repo/Scripts/make-asset-packs.sh" ]; then
