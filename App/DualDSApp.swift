@@ -51,6 +51,7 @@ struct RootView: View {
             .task {
                 // Library sounds never interrupt music from other apps (set off the main thread).
                 await Task.detached(priority: .utility) { try? AudioSessionPolicy.applyInterface() }.value
+                StoreService.shared.start()
                 await importForUITestsIfRequested()
                 await importFromFilesFolder()
             }

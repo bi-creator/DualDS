@@ -73,6 +73,14 @@ enum AppTheme: String, CaseIterable, Identifiable {
         }
     }
 
+    /// Text colour on top of the accent (filled buttons): dark on light accents, white otherwise.
+    var onAccent: Color {
+        switch self {
+        case .neonMaze, .vectorVoid, .dungeonMap, .blockRain, .speedZone, .streetBrawl, .fogTown: Color(hex: 0x111111)
+        default: .white
+        }
+    }
+
     /// Top-to-bottom backdrop gradient (Classic has none: it uses the system background).
     var backgroundColors: [Color] {
         switch self {

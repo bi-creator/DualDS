@@ -43,6 +43,7 @@ sim_test() {
     rm -rf "$ROOT/Build/logs/app-test-sim.xcresult"
     if TEST_RUNNER_DUALDS_SCREENSHOT_DIR="$LOGDIR" \
        TEST_RUNNER_DUALDS_GAME_ROM="$ROOT/Build/import/back_alley_brawl.nds" \
+       TEST_RUNNER_DUALDS_GAME_TEST_DIR="$(cd "$ROOT/.." && pwd)/FoldPlayGames/Build/test" \
        run_logged app-test-sim xcodebuild -project DualDS.xcodeproj -scheme DualDS -configuration Debug \
          -destination "id=$sim" -derivedDataPath "$DERIVED" -resultBundlePath "$ROOT/Build/logs/app-test-sim.xcresult" \
          CODE_SIGNING_ALLOWED=NO ${only[@]+"${only[@]}"} test; then
@@ -132,6 +133,8 @@ testflight() {
 </dict></plist>
 PLIST
   run_logged licenses "$ROOT/Scripts/verify-licenses.sh"
+  # Every FoldPlay Original sold in the store must ship in the build.
+  ls "$ROOT"/Build/Originals/*.fpg >/dev/null 2>&1 || { echo "error: no game packages in Build/Originals; run the games step first" >&2; return 1; }
   run_logged xcodegen xcodegen generate --spec project.yml
   # Archive unsigned: development signing would need a registered test device. The export step
   # signs the app for App Store distribution (automatic signing, distribution certificate).
@@ -220,6 +223,8 @@ games() {
   run_logged games-build "$repo/Scripts/build.sh" $only
   mkdir -p "$ROOT/Build/import"
   cp "$repo"/Build/out/*.nds "$ROOT/Build/import/" 2>/dev/null || true
+  # Package the games for the app bundle (Build/Originals/*.fpg, picked up by project.yml).
+  run_logged originals python3 "$ROOT/Scripts/package-originals.py" "$repo"/Build/out/*.nds "$ROOT/Build/Originals"
 }
 
 core() {

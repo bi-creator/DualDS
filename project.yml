@@ -34,6 +34,11 @@ targets:
       - path: Rendering
       - path: EmulatorBridge
       - path: Resources
+      # FoldPlay Originals game packages (built from ../FoldPlayGames by `ci.sh games`; never in git).
+      - path: Build/Originals
+        type: folder
+        buildPhase: resources
+        optional: true
     dependencies:
       # Built by Scripts/build-core.sh (melonDS + DualDSCore, static, device + simulator slices).
       - framework: Build/DualDSCore.xcframework
@@ -85,6 +90,8 @@ targets:
     platform: iOS
     sources:
       - path: Tests/DualDSTests
+      - path: Config/FoldPlay.storekit
+        buildPhase: resources
       # Original DualDS test ROM (see Tests/Fixtures/testrom). Test bundle only — never shipped in the app.
       - path: Tests/Fixtures/testrom/dualds-test.nds
         buildPhase: resources
@@ -93,6 +100,9 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: $(DUALDS_BUNDLE_ID).tests
+        # StoreKitTest's own SDK header uses an API Apple deprecated in iOS 18; with warnings as
+        # errors that would stop its module from building. Our sources stay under the warning gate.
+        OTHER_SWIFT_FLAGS: $(inherited) -Xcc -Wno-deprecated-declarations
         SWIFT_OBJC_BRIDGING_HEADER: EmulatorBridge/DualDS-Bridging-Header.h
         GENERATE_INFOPLIST_FILE: YES
   DualDSUITests:
@@ -114,6 +124,9 @@ schemes:
     build:
       targets:
         DualDS: all
+    run:
+      config: Debug
+      storeKitConfiguration: Config/FoldPlay.storekit
     test:
       config: Debug
       gatherCoverageData: true

@@ -94,6 +94,7 @@ struct SaveStatesView: View {
                 Task { if await model.loadState(existing) { dismiss() } }
             }
             .buttonStyle(.borderedProminent)
+                    .foregroundStyle(AppTheme.current.onAccent)
             .disabled(existing == nil)
             .accessibilityIdentifier("slot.\(slot).load")
         }

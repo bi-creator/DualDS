@@ -1,0 +1,38 @@
+{
+  "identifier" : "6E3F2A10",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "0.99",
+      "familyShareable" : false,
+      "internalID" : "6837400001",
+      "localizations" : [
+        {
+          "description" : "Original street brawler: 3 stages, 3 bosses.",
+          "displayName" : "Back Alley Brawl",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.bicreator.dualds.backalleybrawl",
+      "referenceName" : "Back Alley Brawl",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_failTransactionsEnabled" : false,
+    "_locale" : "en_US",
+    "_storefront" : "USA",
+    "_storeKitErrors" : [
+
+    ]
+  },
+  "subscriptionGroups" : [
+
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}

@@ -11,6 +11,7 @@ struct GameLibraryView: View {
 
     @State private var showingImporter = false
     @State private var showingSettings = false
+    @State private var showingStore = false
     @State private var selected: Game?
     @State private var pendingDelete: Game?
     @State private var pendingPlay: Game?
@@ -58,6 +59,7 @@ struct GameLibraryView: View {
                     EmulatorView(game: game, storage: model.storage)
                 }
                 .sheet(isPresented: $showingSettings) { SettingsView() }
+                .sheet(isPresented: $showingStore) { StoreView(storage: model.storage) }
                 .overlay {
                     if model.isImporting {
                         ProgressView("Importing…").padding().background(.regularMaterial, in: .rect(cornerRadius: 12))
@@ -109,7 +111,11 @@ struct GameLibraryView: View {
             } actions: {
                 Button { showingImporter = true } label: { Label("Import Game", systemImage: "square.and.arrow.down") }
                     .buttonStyle(.borderedProminent)
+                    .foregroundStyle(AppTheme.current.onAccent)
                     .accessibilityIdentifier("library.import")
+                Button { showingStore = true } label: { Label("Get FoldPlay Originals", systemImage: "bag") }
+                    .buttonStyle(.bordered)
+                    .accessibilityIdentifier("library.storeEmpty")
             }
             Spacer(minLength: 0)
         }
@@ -124,6 +130,10 @@ struct GameLibraryView: View {
                 }
             } label: { Label("Sort", systemImage: "arrow.up.arrow.down") }
             .accessibilityIdentifier("library.sort")
+        }
+        ToolbarItem(placement: .topBarTrailing) {
+            Button { showingStore = true } label: { Label("FoldPlay Store", systemImage: "bag") }
+                .accessibilityIdentifier("library.store")
         }
         ToolbarItem(placement: .topBarTrailing) {
             Button { showingImporter = true } label: { Label("Import", systemImage: "plus") }

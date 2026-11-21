@@ -211,6 +211,21 @@ Created: `project.yml` (XcodeGen), `Config/*.xcconfig`, `App/`, `Features/{Libra
 * Not verifiable in the Simulator: MusicKit playback (needs a device, an Apple Music subscription and
   the MusicKit App Service on the App ID).
 
+## FoldPlay Store and FoldPlay Originals (owner request, 2026-11-21)
+
+* First Original: **Back Alley Brawl** (private repo bi-creator/FoldPlayGames, BlocksDS). Three
+  stages (night street, harbor docks, neon rooftops), three named bosses, breakable cans with food,
+  original PSG chiptune music per stage, touch-screen HUD. `GameROMUITests` plays it on the folded
+  layout and loads stages 2 and 3 from test-only ROM variants.
+* StoreKit 2 purchase flow: `StoreService` (products, entitlements, Transaction.updates, restore),
+  `StoreView` (bag button in the library), `OriginalsInstaller` (unpacks the bundled game into the
+  library). Games ship as scrambled packages in `Build/Originals` (gitignored; built by the `games`
+  step via `Scripts/package-originals.py`); `testflight` refuses to upload without them.
+* In-app purchase `com.bicreator.dualds.backalleybrawl` (Apple ID 6837720558), non-consumable,
+  ₹99 base (India) / US$0.99. Must be submitted together with the next app version.
+* Tests: `StoreTests` (SKTestSession: product, purchase, refund, package round trip, real package
+  install), `StoreUITests`. Local StoreKit config: `Config/FoldPlay.storekit` (also the Run scheme's).
+
 ## Repository
 
 Published (GPL-3.0) at https://github.com/bi-creator/DualDS, branch `main`. About → Source Code links there.

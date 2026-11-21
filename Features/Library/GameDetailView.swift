@@ -46,6 +46,7 @@ struct GameDetailView: View {
                         Label("Play", systemImage: "play.fill").frame(maxWidth: .infinity).font(.headline)
                     }
                     .buttonStyle(.borderedProminent)
+                    .foregroundStyle(AppTheme.current.onAccent)
                     .listRowBackground(Color.clear)
                     .listRowInsets(EdgeInsets())
                     .accessibilityIdentifier("detail.play")

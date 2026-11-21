@@ -261,6 +261,7 @@ struct EmulatorView: View {
                 Image(systemName: "exclamationmark.triangle").font(.largeTitle)
                 Text(message).multilineTextAlignment(.center)
                 Button("Close") { close() }.buttonStyle(.borderedProminent)
+                    .foregroundStyle(AppTheme.current.onAccent)
             }
             .foregroundStyle(.white)
             .padding(24)
